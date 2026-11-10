@@ -384,37 +384,84 @@ jobs:
                   if re.search(r"(R\.mipmap\.|@mipmap/)%s(_round|_foreground|_monochrome|_background)?\b" % nm, t): dead.append((f, nm))
           assert not dead, f"deleted icons still referenced: {dead[:5]}"
 
-          # ------------------------------------------------------------------ 3. About page: developer info, no donations
+          # ------------------------------------------------------------------ 3. About page: developer links (no donations)
+          OWNER = SLUG.split("/")[0]
           ab = f"{KT}/ui/screens/settings/AboutScreen.kt"
           s = rd(ab)
-          if 'title = "Developer"' not in s:
-              owner = SLUG.split("/")[0]
-              block = f'''      item {{
+          s = re.sub(r'(?:      // nika-developer\n)?      item \{\n        Material3SettingsGroup\(\n          title = "Developer",.*?\n      \}\n\n', '', s, count=1, flags=re.S)
+          def link_item(icon, title, desc, url):
+              return f"""              Material3SettingsItem(
+                          icon = painterResource(R.drawable.{icon}),
+                          title = {{ Text("{title}") }},
+                          description = {{ Text("{desc}") }},
+                          onClick = {{ uriHandler.openUri("{url}") }}
+                        )"""
+          items = ",\n".join([
+              link_item("github", "View GitHub Repository", "Source code and contributions", f"https://github.com/{SLUG}"),
+              link_item("website", "Website", "sandipgg.is-a.dev", "https://sandipgg.is-a.dev"),
+              link_item("instagram", "Instagram", "@sandip.gurung07", "https://instagram.com/sandip.gurung07"),
+              link_item("discord", "Discord", "716445719807918160", "https://discord.com/users/716445719807918160"),
+          ])
+          block = f"""      // nika-developer
+                item {{
                   Material3SettingsGroup(
                     title = "Developer",
                     items =
                       listOf(
-                        Material3SettingsItem(
-                          icon = painterResource(R.drawable.person),
-                          title = {{ Text("Sandip") }},
-                          description = {{ Text("Developer of Nika Music") }},
-                          onClick = {{ uriHandler.openUri("https://github.com/{owner}") }}
-                        ),
-                        Material3SettingsItem(
-                          icon = painterResource(R.drawable.github),
-                          title = {{ Text("GitHub") }},
-                          description = {{ Text("{SLUG}") }},
-                          onClick = {{ uriHandler.openUri("https://github.com/{SLUG}") }}
-                        )
+          {items}
                       )
                   )
                 }}
 
-          '''
-              anchor = "/* item {"
-              assert anchor in s, "About anchor missing"
-              s = s.replace(anchor, block + anchor, 1)
-              wr(ab, s)
+          """
+          anchor = "/* item {"
+          assert anchor in s, "About anchor missing"
+          s = s.replace(anchor, block + anchor, 1)
+          # hide the GitHub Actions bot from the contributors row
+          if "contributors = list\n" in s:
+              s = s.replace("contributors = list\n", 'contributors = list.filter { !it.login.endsWith("[bot]") }\n', 1)
+          wr(ab, s)
+
+          # Instagram icon (the base app has none)
+          wr(f"{RES}/drawable/instagram.xml", """<vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="24dp"
+              android:height="24dp"
+              android:viewportWidth="24"
+              android:viewportHeight="24">
+            <path
+                android:fillColor="@android:color/white"
+                android:pathData="M7.8,2h8.4C19.4,2 22,4.6 22,7.8v8.4a5.8,5.8 0,0 1,-5.8 5.8H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0,0 1,7.8 2zM7.6,4A3.6,3.6 0,0 0,4 7.6v8.8C4,18.4 5.6,20 7.6,20h8.8a3.6,3.6 0,0 0,3.6 -3.6V7.6C20,5.6 18.4,4 16.4,4H7.6zM17.25,5.5a1.25,1.25 0,1 1,0 2.5,1.25 1.25,0 0,1 0,-2.5zM12,7a5,5 0,1 1,0 10,5 5,0 0,1 0,-10zM12,9a3,3 0,1 0,0 6,3 3,0 0,0 0,-6z"/>
+          </vector>
+          """)
+
+          # ------------------------------------------------------------------ 3b. update screen -> this repo's GitHub releases
+          us = f"{KT}/ui/screens/settings/UpdateSettings.kt"
+          s = rd(us)
+          s = s.replace('Uri.parse("https://echomusic.fun")', f'Uri.parse("https://github.com/{SLUG}/releases/latest")')
+          s = s.replace("To download updates, you will be redirected to our official site containing ads. This helps fund the app's development. Thank you for your support!",
+                        "Tap above to open the latest release on GitHub, then download the .apk file under Assets.")
+          s = s.replace("repos/EchoMusicApp/Echo-Music/", f"repos/{SLUG}/")
+          wr(us, s)
+
+          # ------------------------------------------------------------------ 3c. Discord "App Icon" -> Nika logo
+          logo = Image.new("RGB", (512, 512), (14, 14, 14))
+          g = n_glyph(512, 0.62)
+          logo.paste(g, (0, 0), g)
+          logo.save("nika_logo.png")
+          LOGO_URL = f"https://raw.githubusercontent.com/{SLUG}/HEAD/nika_logo.png"
+          for f in glob.glob(f"{KT}/**/*.kt", recursive=True):
+              t = rd(f)
+              u = t.replace("https://avatars.githubusercontent.com/u/258176326?s=200&v=4", LOGO_URL)
+              u = u.replace("https://github.com/EchoMusicApp/Echo-Music", f"https://github.com/{SLUG}")
+              u = u.replace('"https://echomusic.fun"', f'"https://github.com/{SLUG}/releases/latest"')
+              if u != t: wr(f, u)
+
+          # ------------------------------------------------------------------ 3d. version: fresh start
+          gr = "app/build.gradle.kts"
+          s = rd(gr)
+          s = re.sub(r'versionCode = [^\n]+', 'versionCode = 1000 + (System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 0)', s, count=1)
+          s = re.sub(r'versionName = "[^"]*"', 'versionName = "1.0.0"', s, count=1)
+          wr(gr, s)
 
           # ------------------------------------------------------------------ 4. original developer's birthday notification
           ma = f"{KT}/MainActivity.kt"
@@ -423,40 +470,66 @@ jobs:
           if old in s: wr(ma, s.replace(old, "if (false) { // disabled: belonged to the original app's developer", 1))
 
           # ------------------------------------------------------------------ 5. README
-          wr("README.md", f'''# Nika Music
+          wr("README.md", f'''<h1 align="center">Nika Music</h1>
 
-          A Material You music player for Android.
+          <p align="center">
+            <img src="nika_logo.png" width="120" alt="Nika Music logo"/>
+          </p>
+
+          <p align="center">
+            A Material You music player for Android, with ad-free streaming, offline downloads and word-by-word lyrics.
+          </p>
+
+          <p align="center">
+            <a href="https://github.com/{SLUG}/releases/latest"><img alt="Download" src="https://img.shields.io/badge/Download-APK-6C4DFF?style=for-the-badge&logo=android&logoColor=white"/></a>
+            <img alt="License" src="https://img.shields.io/badge/License-GPL--3.0-blue?style=for-the-badge"/>
+            <img alt="Android" src="https://img.shields.io/badge/Android-8.0%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white"/>
+          </p>
 
           > **Nika Music is a fork of [Echo Music](https://github.com/EchoMusicApp/Echo-Music)**, an open-source (GPL-3.0)
-          > YouTube Music client. All credit for the original app goes to the Echo Music authors and contributors.
+          > YouTube Music client. Huge thanks to the Echo Music authors and contributors, who built the app this is based on.
+
+          ---
+
+          ## Download
+
+          1. Open the [**latest release**](https://github.com/{SLUG}/releases/latest).
+          2. Under **Assets**, download **`NikaMusic.apk`** (not the "Source code" links).
+          3. Open the file and install it. If Android asks, allow installs from your browser or file manager.
+
+          Requires Android 8.0 (API 26) or newer. If you already have an older Nika Music build with a different signature
+          or a higher version, uninstall it first.
+
+          ## Features
+
+          Nika Music inherits its feature set from Echo Music:
+
+          - **Streaming and playback**: ad-free streaming, background playback, crossfade, data saver mode, audio and video switching
+          - **Offline**: download songs, albums and playlists with a built-in download manager
+          - **Lyrics**: synchronized lyrics with word-by-word timing, several animation styles and built-in translation
+          - **Discovery**: song recognition, smart recommendations, charts, podcasts, moods and genres
+          - **Customization**: Material You theming, dynamic colors, UI density, high refresh rate support, album-art options
+          - **Smart playback**: pause on mute, resume when Bluetooth headphones reconnect, sleep timer and more
+          - **Extras**: widgets, equalizer, listening stats (Wrapped), Discord presence, sharing through Song.link
+
+          Some features depend on third-party services and may change or stop working over time.
 
           ## What is different from Echo Music
 
           - New name, new logo and new package ID: `nika.music.sandip`
           - App-icon choices trimmed to the Nika icon plus Billie Eilish, Sabrina Carpenter and Dog
-          - The original developer's promo, social and donation links were removed (Nika Music has none yet)
-          - The About page shows this project's own developer and GitHub info
+          - The original developer's promo, social and donation links were removed
+          - The About page, update link and Discord presence point to this project
+          - Versioning starts fresh at **1.0.0**
 
-          Everything else (playback, library, synced lyrics, song recognition, downloads, widgets, Wrapped, equalizer and
-          more) comes from Echo Music. See the upstream project for the full feature list and for features I haven't verified.
+          ## Credits
 
-          ## Get the app
+          - [Echo Music](https://github.com/EchoMusicApp/Echo-Music) for the base application
+          - Inspiration from Metrolist, Vivi Music, ArchiveTune, Better Lyrics, SimpMusic, Music Recognizer and BravePipe
 
-          Open the **Releases** page of this repository and download the file ending in `.apk` under **Assets**
-          (not "Source code"). Allow installs from your browser if Android asks.
+          ## Developer
 
-          ## Build it yourself (no computer needed)
-
-          1. Open **Actions** -> **Build Nika Music** -> **Run workflow**.
-          2. When it finishes, the APK is published under **Releases**.
-
-          On a computer: `./gradlew assembleUniversalFossDebug` (JDK 21, Android SDK + NDK 28.2.13676358).
-
-          ## Credits and inspiration
-
-          Echo Music (upstream project), and the open-source projects this app draws on:
-          Metrolist and Vivi Music (architecture), ArchiveTune (Material You UI), Better Lyrics and SimpMusic (lyrics),
-          Music Recognizer (audio recognition), BravePipe (playback and decryption handling).
+          **Sandip** - [GitHub](https://github.com/{OWNER}) | [Website](https://sandipgg.is-a.dev) | [Instagram](https://instagram.com/sandip.gurung07)
 
           ## Licence
 
@@ -577,7 +650,7 @@ jobs:
           mkdir -p dist
           apk=$(find echo/app/build/outputs/apk -name '*.apk' | head -n 1)
           echo "Found: $apk"
-          cp "$apk" "dist/NikaMusic-build-${{ github.run_number }}.apk"
+          cp "$apk" "dist/NikaMusic.apk"
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
