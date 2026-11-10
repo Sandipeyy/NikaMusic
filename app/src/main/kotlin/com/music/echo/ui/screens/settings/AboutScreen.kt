@@ -78,7 +78,7 @@ fun AboutScreen(
             )
           )
         }
-        contributors = list
+        contributors = list.filter { !it.login.endsWith("[bot]") }
       } catch (e: Exception) {
         e.printStackTrace()
       }
@@ -164,22 +164,35 @@ fun AboutScreen(
         }
       }
 
+      // nika-developer
       item {
         Material3SettingsGroup(
           title = "Developer",
           items =
             listOf(
               Material3SettingsItem(
-                icon = painterResource(R.drawable.person),
-                title = { Text("Sandip") },
-                description = { Text("Developer of Nika Music") },
-                onClick = { uriHandler.openUri("https://github.com/Sandipeyy") }
+                icon = painterResource(R.drawable.github),
+                title = { Text("View GitHub Repository") },
+                description = { Text("Source code and contributions") },
+                onClick = { uriHandler.openUri("https://github.com/Sandipeyy/NikaMusicBeta") }
               ),
               Material3SettingsItem(
-                icon = painterResource(R.drawable.github),
-                title = { Text("GitHub") },
-                description = { Text("Sandipeyy/NikaMusicBeta") },
-                onClick = { uriHandler.openUri("https://github.com/Sandipeyy/NikaMusicBeta") }
+                icon = painterResource(R.drawable.website),
+                title = { Text("Website") },
+                description = { Text("sandipgg.is-a.dev") },
+                onClick = { uriHandler.openUri("https://sandipgg.is-a.dev") }
+              ),
+              Material3SettingsItem(
+                icon = painterResource(R.drawable.instagram),
+                title = { Text("Instagram") },
+                description = { Text("@sandip.gurung07") },
+                onClick = { uriHandler.openUri("https://instagram.com/sandip.gurung07") }
+              ),
+              Material3SettingsItem(
+                icon = painterResource(R.drawable.discord),
+                title = { Text("Discord") },
+                description = { Text("716445719807918160") },
+                onClick = { uriHandler.openUri("https://discord.com/users/716445719807918160") }
               )
             )
         )

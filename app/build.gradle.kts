@@ -33,8 +33,8 @@ android {
     applicationId = "nika.music.sandip"
     minSdk = 26
     targetSdk = 36
-    versionCode = 167
-    versionName = "1.4.6"
+    versionCode = 1000 + (System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 0)
+    versionName = "1.0.0"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     vectorDrawables.useSupportLibrary = true

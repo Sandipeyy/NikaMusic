@@ -86,7 +86,7 @@ object DiscordImageResolver {
           ?: song.thumbnailUrl?.asHttpUrl()
       }
       "appicon" -> {
-        "https://avatars.githubusercontent.com/u/258176326?s=200&v=4"
+        "https://raw.githubusercontent.com/Sandipeyy/NikaMusicBeta/HEAD/nika_logo.png"
       }
       "custom" -> {
         customUrl?.asHttpUrl()
