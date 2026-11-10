@@ -1,5 +1,13 @@
 name: Build Nika Music
 
+# Run it from the Actions tab -> "Build Nika Music" -> "Run workflow".
+#
+# FIRST RUN: tick "Save the full project source into this repo". The workflow downloads the open-source
+# (GPL-3.0) base app, rebrands it to "Nika Music" (nika.music.sandip), commits the complete project into
+# this repo, then builds the APK.
+# LATER RUNS: the project already lives in this repo, so it is built directly from it (faster).
+# The installable .apk is published under this repo's Releases -> Assets.
+
 on:
   workflow_dispatch:
     inputs:
@@ -13,7 +21,7 @@ on:
         default: false
 
 permissions:
-  contents: write 
+  contents: write   # lets the workflow publish the APK as a Release
 
 env:
   ECHO_REPO: https://github.com/EchoMusicApp/Echo-Music.git
@@ -31,7 +39,7 @@ jobs:
       - name: Detect project source in this repo
         id: src
         run: |
-          if [ -f nika-src/gradlew ]; then echo "has=true" >> "$GITHUB_OUTPUT"; echo "Project found in repo: building from it"
+          if [ -f nika-src/gradlew ]; then  "has=true" >> "$GITHUB_OUTPUT"; echo "Project found in repo: building from it"
           else echo "has=false" >> "$GITHUB_OUTPUT"; echo "No project in repo yet: downloading the base app"; fi
 
       - name: Download base app source
@@ -46,6 +54,8 @@ jobs:
 
       - name: Rebrand to Nika Music
         if: steps.src.outputs.has != 'true'
+        env:
+          NIKA_REPO: ${{ github.repository }}
         run: |
           cat > "$RUNNER_TEMP/nika_rebrand.py" <<'PYEOF'
           #!/usr/bin/env python3
@@ -69,16 +79,18 @@ jobs:
               s = rd(path)
               assert old in s, f"rebrand anchor missing in {path}: {old[:60]!r}"
               wr(path, s.replace(old, new, count))
-  
+
+          # ---------- 1. application id, Firebase, accent colour ----------
           must_sub("app/build.gradle.kts", 'applicationId = "echo.music.iad1tya"', f'applicationId = "{APP_ID}"')
           s = rd("app/build.gradle.kts"); s = s.replace('      applicationIdSuffix = ".debug"\n', ""); wr("app/build.gradle.kts", s)
           must_sub(f"{RES}/xml/shortcuts.xml", 'android:targetPackage="echo.music.iad1tya"', f'android:targetPackage="{APP_ID}"', count=99)
-          if os.path.exists("app/google-services.json"): os.remove("app/google-services.json") 
+          if os.path.exists("app/google-services.json"): os.remove("app/google-services.json")  # Echo's Firebase project
           must_sub(f"{KT}/ui/theme/Theme.kt", "val DefaultThemeColor = Color(0xFFED5564)", f"val DefaultThemeColor = Color(0xFF{BRAND_HEX})")
-      
+
+          # ---------- 2. visible text in every language ----------
           CREDIT = re.compile(r"echodh|Agamy", re.I)
           def brand_text(t):
-              if CREDIT.search(t):              
+              if CREDIT.search(t):                       # credits to Echo's authors would be wrong for Nika
                   return "Thanks to the open-source community"
               t = re.sub(r"(?i)echo\s?music(?:app)?", "Nika Music", t)
               return re.sub(r"\bEcho\b", "Nika", t)
@@ -87,20 +99,22 @@ jobs:
           for f in glob.glob(f"{RES}/values*/*.xml"):
               s = rd(f); n = node.sub(lambda m: ">" + brand_text(m.group(1)) + "<", s)
               if n != s: wr(f, n); changed_xml.append(f)
-          
+
+          # ---------- 3. visible text in Kotlin string literals ----------
           LIT = re.compile(r'"(?:[^"\\\n]|\\.)*"')
           def lit_fix(m):
               lit = m.group(0)
               if not re.search(r"\bEcho\b", lit) and not re.search(r"(?i)echo\s?music", lit): return lit
-              if re.search(r"echo\.music|com\.music|://|/", lit): return lit     
+              if re.search(r"echo\.music|com\.music|://|/", lit): return lit      # ids, urls, repo names
               return brand_text(lit)
           changed_kt = []
           for f in glob.glob("app/src/**/*.kt", recursive=True):
-              if "/listentogether/" in f: continue                                 
+              if "/listentogether/" in f: continue                                 # server protocol strings
               s = rd(f); n = LIT.sub(lit_fix, s)
               if n != s: wr(f, n); changed_kt.append(f)
-          must_sub(f"{KT}/ui/screens/settings/AboutScreen.kt", '"Developed by Aditya"', '"Developed by Sandip Gurung"')
-          
+          must_sub(f"{KT}/ui/screens/settings/AboutScreen.kt", '"Developed by Aditya"', '"Developed by Sandip"')
+
+          # ---------- 4. remove the original developer's social/donation links ----------
           def skip_str(s, i):
               q = s[i]; i += 1
               while s[i] != q:
@@ -135,17 +149,20 @@ jobs:
           remove_block(W, 'uriHandler.openUri("https://github.com/EchoMusicApp/Echo-Music")', "Button(")
           for t in ("Developer", "Support", "Community"):
               remove_block(A, f'Material3SettingsGroup(\n          title = "{t}"', "item {")
-         
+
+          # ---------- 5. don't offer Echo's own releases as updates ----------
           must_sub(f"{KT}/echomusic/updater/echomusicupdater.kt",
                    '  withContext(Dispatchers.IO) {\n    try {\n      val url = URL("https://api.github.com/repos/EchoMusicApp/Echo-Music/releases/latest")',
                    '  withContext(Dispatchers.IO) {\n    // Nika Music has no update feed of its own yet; never offer another project\'s APK.\n    onError()\n    return@withContext\n    try {\n      val url = URL("https://api.github.com/repos/EchoMusicApp/Echo-Music/releases/latest")')
-          
+
+          # ---------- 7. repo links: point Changelog/Commits/Contributors/Discord-button at YOUR repo ----------
           SLUG = sys.argv[2] if len(sys.argv) > 2 else None
           if SLUG:
               for f in glob.glob("app/src/**/*.kt", recursive=True):
                   s = rd(f)
                   if "EchoMusicApp/Echo-Music" in s: wr(f, s.replace("EchoMusicApp/Echo-Music", SLUG))
 
+          # ---------- 8. report anything visible that still says Echo (informational) ----------
           left = 0
           for f in glob.glob(f"{RES}/values*/*.xml"):
               left += len(re.findall(r">[^<>]*(?:\bEcho\b|(?i:echo ?music))[^<>]*<", rd(f)))
@@ -153,7 +170,7 @@ jobs:
 
           print(f"OK: {len(changed_xml)} string files, {len(changed_kt)} kotlin files")
           PYEOF
-          python3 -I "$RUNNER_TEMP/nika_rebrand.py" echo "${{ github.repository }}"
+          python3 -I "$RUNNER_TEMP/nika_rebrand.py" echo "$NIKA_REPO"
 
       - name: Use project source from this repo
         if: steps.src.outputs.has == 'true'
@@ -162,6 +179,8 @@ jobs:
           tar -C nika-src --exclude=.git -cf - . | tar -C echo -xf -
 
       - name: Apply Nika branding (logo, icons, About page, README)
+        env:
+          NIKA_REPO: ${{ github.repository }}
         run: |
           pip install --quiet pillow
           cat > "$RUNNER_TEMP/nika_update.py" <<'PYEOF2'
@@ -240,7 +259,8 @@ jobs:
               assert files or not required, f"no files for {pattern}"
               for f in files: make(Image.open(f).size[0]).save(f)
               return len(files)
-          
+
+          # ------------------------------------------------------------------ 1. main logo, everywhere
           n = 0
           for d in glob.glob(f"{RES}/mipmap-*"):
               if d.endswith(("anydpi", "anydpi-v26")): continue
@@ -252,19 +272,20 @@ jobs:
           bgf = f"{RES}/values/ic_launcher_background.xml"
           wr(bgf, re.sub(r'(<color name="ic_launcher_background">)[^<]*(</color>)', r"\g<1>#000000\g<2>", rd(bgf)))
           for name, make in {
-              "icon": lambda z: tile(z, "square", .62),                 
-              "ic_launcher_nobg": lambda z: n_glyph(z, .72),            
-              "echomusicnotification": lambda z: n_glyph(z, .80),      
-              "ic_qs_echo_logo": lambda z: n_glyph(z, .80),            
-              "ic_launcher_foreground": lambda z: n_glyph(z, .62),     
+              "icon": lambda z: tile(z, "square", .62),                 # widget logo + bitmap wrappers
+              "ic_launcher_nobg": lambda z: n_glyph(z, .72),            # artwork placeholder
+              "echomusicnotification": lambda z: n_glyph(z, .80),       # status-bar icon (must be a plain shape)
+              "ic_qs_echo_logo": lambda z: n_glyph(z, .80),             # quick-settings tile
+              "ic_launcher_foreground": lambda z: n_glyph(z, .62),      # lyrics card + download notification
               "ic_launcher_monochrome": lambda z: n_glyph(z, .62),
           }.items():
               c = sum(rewrite(f, make, False) for f in glob.glob(f"{RES}/drawable*/{name}.png"))
               assert c >= 1 or name == "ic_launcher_monochrome", f"drawable {name} not found"
           for f in glob.glob("app/src/**/ic_launcher-playstore.png", recursive=True):
               tile(512, "square").save(f)
-          for f in glob.glob(f"{RES}/drawable/echo_music_library_circle.xml"): os.remove(f)
-          
+          for f in glob.glob(f"{RES}/drawable/echo_music_library_circle.xml"): os.remove(f)  # unused old-logo vector
+
+          # ------------------------------------------------------------------ 2. alternate icons: keep Billie + Sabrina, add Dog
           REMOVE = ("legacy_icon legacy_pixel_icon new_pixel_icon ic_launcher_static cat_icon crazy_blue_icon pookie_icon "
                     "sky_icon echo_cat_icon eko_icon ic_launcher_craft ic_launcher_sadie ic_launcher_neon_glass "
                     "ic_launcher_millie tamil_naidu_icon wierd_cat_icon").split()
@@ -288,7 +309,8 @@ jobs:
           wr(f"{RES}/mipmap-anydpi-v26/dog_icon_round.xml", adaptive)
           wr(f"{RES}/values/nika_colors.xml",
              '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n  <color name="dog_icon_background">#000000</color>\n</resources>\n')
-          
+
+          # manifest: drop removed aliases, add Dog (cloned from the Billie Eilish alias)
           man = rd(MAN)
           alias_re = re.compile(r"[ \t]*<activity-alias\b.*?</activity-alias>[ \t]*\n?", re.S)
           KEEP = {".MainActivityAlias", ".MainActivityBillieEilish", ".MainActivitySabrina", ".MainActivitySabrina2", ".MainActivityDog"}
@@ -423,6 +445,8 @@ jobs:
           Open the **Releases** page of this repository and download the file ending in `.apk` under **Assets**
           (not "Source code"). Allow installs from your browser if Android asks.
 
+          ## Build it yourself (no computer needed)
+
           1. Open **Actions** -> **Build Nika Music** -> **Run workflow**.
           2. When it finishes, the APK is published under **Releases**.
 
@@ -442,8 +466,11 @@ jobs:
 
           print("update OK:", n, "main images,", removed, "old icon files removed")
           PYEOF2
-          python3 -I "$RUNNER_TEMP/nika_update.py" echo "${{ github.repository }}"
-      
+          python3 -I "$RUNNER_TEMP/nika_update.py" echo "$NIKA_REPO"
+
+      # Your changes live in this repo and are applied on top of the base app at build time:
+      #   overlay/    files copied over the project (same folder layout as the project)
+      #   patches/    *.patch files applied with git apply, in name order
       - name: Apply Nika customizations
         run: |
           set -e
@@ -455,6 +482,8 @@ jobs:
             git -C echo apply --whitespace=nowarn "$GITHUB_WORKSPACE/$p"
           done
 
+      # Commits the complete project (with the latest branding) into this repo. The base project's own promo files
+      # and CI are left out; the licence is kept. Your .github/workflows folder is never touched.
       - name: Save project into this repo
         if: ${{ inputs.save_source }}
         run: |
@@ -487,12 +516,15 @@ jobs:
         run: |
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;28.2.13676358" > /dev/null
-      
+
+      # Fixed debug signing key so every new build installs over the previous one.
+      # (Debug key only: do not use it for Play Store releases.)
       - name: Install signing key
         run: |
           mkdir -p "$HOME/.android"
           echo "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" | base64 -d > "$HOME/.android/debug.keystore"
-      
+
+      # Gradle's download server sometimes returns 504. Retry, then try its alternate address.
       - name: Download Gradle (with retries)
         working-directory: echo
         run: |
@@ -512,7 +544,9 @@ jobs:
       - name: Build APK
         working-directory: echo
         run: |
-          set -o pipefail          
+          set -o pipefail
+          # Download servers (Maven/GitHub) sometimes time out with a 504. Gradle keeps what it already
+          # downloaded, so simply retrying usually succeeds. Real code errors will fail every attempt.
           for i in 1 2 3 4; do
             ./gradlew assembleUniversalFossDebug --console=plain 2>&1 | tee -a "$GITHUB_WORKSPACE/build.log" && exit 0
             echo "Build attempt $i failed; retrying in $((i * 30))s..."
@@ -520,6 +554,7 @@ jobs:
           done
           exit 1
 
+      # If the build fails, put the real error on the run's Summary page (easy to read on a phone).
       - name: Show error summary
         if: failure()
         run: |
