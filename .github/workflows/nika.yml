@@ -1,13 +1,5 @@
 name: Build Nika Music
 
-# Run it from the Actions tab -> "Build Nika Music" -> "Run workflow".
-#
-# FIRST RUN: tick "Save the full project source into this repo". The workflow downloads the open-source
-# (GPL-3.0) base app, rebrands it to "Nika Music" (nika.music.sandip), commits the complete project into
-# this repo, then builds the APK.
-# LATER RUNS: the project already lives in this repo, so it is built directly from it (faster).
-# The installable .apk is published under this repo's Releases -> Assets.
-
 on:
   workflow_dispatch:
     inputs:
@@ -21,7 +13,7 @@ on:
         default: false
 
 permissions:
-  contents: write   # lets the workflow publish the APK as a Release
+  contents: write
 
 env:
   ECHO_REPO: https://github.com/EchoMusicApp/Echo-Music.git
@@ -434,6 +426,12 @@ jobs:
           </vector>
           """)
 
+          # no DEBUG badge on the About page
+          s = rd(ab)
+          if "if (BuildConfig.DEBUG) {\n        Surface(" in s:
+              s = s.replace("if (BuildConfig.DEBUG) {\n        Surface(", "if (false) {\n        Surface(", 1)
+              wr(ab, s)
+
           # ------------------------------------------------------------------ 3b. update screen -> this repo's GitHub releases
           us = f"{KT}/ui/screens/settings/UpdateSettings.kt"
           s = rd(us)
@@ -442,6 +440,71 @@ jobs:
                         "Tap above to open the latest release on GitHub, then download the .apk file under Assets.")
           s = s.replace("repos/EchoMusicApp/Echo-Music/", f"repos/{SLUG}/")
           wr(us, s)
+
+          # ------------------------------------------------------------------ 3a. working in-app updater (GitHub Releases)
+          up = f"{KT}/echomusic/updater/echomusicupdater.kt"
+          s = rd(up)
+          KT_UPDATER = r"""suspend fun checkForUpdate(
+            context: Context,
+            onSuccess:
+              (
+                tag: String,
+                isAvailable: Boolean,
+                changelog: List<ChangelogSection>,
+                size: String,
+                date: String,
+                description: String?,
+                imageUrl: String?,
+                apkUrl: String?
+              ) -> Unit,
+            onError: () -> Unit,
+          ) {
+            // nika-updater: compares this build with the newest "build-N" release of the Nika Music repo
+            withContext(Dispatchers.IO) {
+              try {
+                val url = URL("https://api.github.com/repos/__SLUG__/releases/latest")
+                val json = url.openStream().bufferedReader().use { it.readText() }
+                val release = JSONObject(json)
+                val tag = release.getString("tag_name")
+                val latestBuild = tag.filter { it.isDigit() }.toIntOrNull() ?: 0
+                val currentBuild = BuildConfig.VERSION_CODE - 1000
+                if (latestBuild > currentBuild) {
+                  val assets = release.getJSONArray("assets")
+                  var apkUrl = ""
+                  var sizeMb = ""
+                  for (i in 0 until assets.length()) {
+                    val asset = assets.getJSONObject(i)
+                    if (asset.getString("name").endsWith(".apk", ignoreCase = true)) {
+                      apkUrl = asset.getString("browser_download_url")
+                      sizeMb = String.format("%.1f", asset.getLong("size") / (1024.0 * 1024.0))
+                      break
+                    }
+                  }
+                  if (apkUrl.isNotEmpty()) {
+                    val body = release.optString("body", "").trim()
+                    val (parsedDesc, sections) = parseMarkdownToSections(body)
+                    val description = parsedDesc ?: body.takeIf { it.isNotEmpty() && sections.isEmpty() }
+                    val date = formatGitHubDate(release.getString("published_at"))
+                    withContext(Dispatchers.Main) {
+                      onSuccess("build $latestBuild", true, sections, sizeMb, date, description, null, apkUrl)
+                    }
+                    return@withContext
+                  }
+                }
+                withContext(Dispatchers.Main) {
+                  onSuccess(BuildConfig.VERSION_NAME, false, emptyList(), "", "", null, null, null)
+                }
+              } catch (e: Exception) {
+                Log.e("NikaUpdater", "Update check failed", e)
+                withContext(Dispatchers.Main) { onError() }
+              }
+            }
+          }
+          """
+          i = s.index("suspend fun checkForUpdate(")
+          j = s.index("\n}\n", i) + 3
+          s = s[:i] + KT_UPDATER.replace("__SLUG__", SLUG) + s[j:]
+          wr(up, s)
 
           # ------------------------------------------------------------------ 3c. Discord "App Icon" -> Nika logo
           logo = Image.new("RGB", (512, 512), (14, 14, 14))
@@ -657,7 +720,7 @@ jobs:
         with:
           tag_name: build-${{ github.run_number }}
           name: Nika Music build ${{ github.run_number }}
-          body: "Download the file ending in .apk under Assets below (not the 'Source code' links)."
+          body: "Nika Music build ${{ github.run_number }}. Download NikaMusic.apk below."
           files: dist/*.apk
           prerelease: false
           make_latest: true
