@@ -672,107 +672,43 @@ suspend fun checkForUpdate(
     ) -> Unit,
   onError: () -> Unit,
 ) {
+  // nika-updater: compares this build with the newest "build-N" release of the Nika Music repo
   withContext(Dispatchers.IO) {
-    // Nika Music has no update feed of its own yet; never offer another project's APK.
-    onError()
-    return@withContext
     try {
-      val url = URL("https://api.github.com/repos/Sandipeyy/NikaMusicBeta/releases/latest")
+      val url = URL("https://api.github.com/repos/Sandipeyy/NikaMusic/releases/latest")
       val json = url.openStream().bufferedReader().use { it.readText() }
-      val targetRelease = JSONObject(json)
-
-      val currentVersion = BuildConfig.VERSION_NAME
-      val targetTagName = targetRelease.getString("tag_name")
-      val currentClean = currentVersion.removePrefix("b").removePrefix("v").trim()
-      val targetClean = targetTagName.removePrefix("b").removePrefix("v").trim()
-      val shouldShow = currentClean != targetClean
-
-      if (shouldShow) {
-        val tagWithPrefix = targetRelease.getString("tag_name")
-        val displayTag = tagWithPrefix
-
-        val changelogList = mutableListOf<ChangelogSection>()
-        var description: String? = null
-        var imageUrl: String? = null
-        try {
-          val changelogUrl =
-            URL(
-              "https://github.com/Sandipeyy/NikaMusicBeta/releases/download/$tagWithPrefix/changelog.json"
-            )
-          val changelogJson = changelogUrl.openStream().bufferedReader().use { it.readText() }
-          val changelogData = JSONObject(changelogJson)
-
-          description = changelogData.optString("description").takeIf { it.isNotEmpty() }
-          imageUrl = changelogData.optString("image").takeIf { it.isNotEmpty() }
-
-          val changelogArray = changelogData.getJSONArray("changelog")
-          for (j in 0 until changelogArray.length()) {
-            val sectionObj = changelogArray.getJSONObject(j)
-            val title = sectionObj.getString("title")
-            val itemsArray = sectionObj.getJSONArray("items")
-            val itemsList = mutableListOf<String>()
-            for (k in 0 until itemsArray.length()) {
-              itemsList.add(itemsArray.getString(k))
-            }
-            changelogList.add(ChangelogSection(title, itemsList))
-          }
-        } catch (e: Exception) {
-          var body =
-            targetRelease.optString("body", context.getString(R.string.no_changelog_available))
-
-          val imageRegex = Regex("!\\[(.*?)\\]\\((.*?)\\)")
-          val match = imageRegex.find(body)
-          if (match != null) {
-            imageUrl = match.groupValues[2]
-            body = body.replace(match.value, "").trim()
-          }
-          val (parsedDesc, parsedSections) = parseMarkdownToSections(body)
-          description = parsedDesc ?: body.takeIf { parsedSections.isEmpty() }
-          changelogList.addAll(parsedSections)
-        }
-
-        val publishedAt = targetRelease.getString("published_at")
-        val formattedReleaseDate = formatGitHubDate(publishedAt)
-        val assets = targetRelease.getJSONArray("assets")
-
-        var apkSizeInMB = ""
-        var apkDownloadUrl = ""
-        for (j in 0 until assets.length()) {
-          val asset = assets.getJSONObject(j)
-          val assetName = asset.getString("name")
-          if (
-            assetName.endsWith(".apk", ignoreCase = true) &&
-              !assetName.lowercase().contains("debug")
-          ) {
-            val apkSizeInBytes = asset.getLong("size")
-            apkSizeInMB = String.format("%.1f", apkSizeInBytes / (1024.0 * 1024.0))
-            apkDownloadUrl = asset.getString("browser_download_url")
+      val release = JSONObject(json)
+      val tag = release.getString("tag_name")
+      val latestBuild = tag.filter { it.isDigit() }.toIntOrNull() ?: 0
+      val currentBuild = BuildConfig.VERSION_CODE - 1000
+      if (latestBuild > currentBuild) {
+        val assets = release.getJSONArray("assets")
+        var apkUrl = ""
+        var sizeMb = ""
+        for (i in 0 until assets.length()) {
+          val asset = assets.getJSONObject(i)
+          if (asset.getString("name").endsWith(".apk", ignoreCase = true)) {
+            apkUrl = asset.getString("browser_download_url")
+            sizeMb = String.format("%.1f", asset.getLong("size") / (1024.0 * 1024.0))
             break
           }
         }
-
-        if (apkDownloadUrl.isNotEmpty()) {
+        if (apkUrl.isNotEmpty()) {
+          val body = release.optString("body", "").trim()
+          val (parsedDesc, sections) = parseMarkdownToSections(body)
+          val description = parsedDesc ?: body.takeIf { it.isNotEmpty() && sections.isEmpty() }
+          val date = formatGitHubDate(release.getString("published_at"))
           withContext(Dispatchers.Main) {
-            onSuccess(
-              displayTag,
-              true,
-              changelogList,
-              apkSizeInMB,
-              formattedReleaseDate,
-              description,
-              imageUrl,
-              apkDownloadUrl
-            )
+            onSuccess("build $latestBuild", true, sections, sizeMb, date, description, null, apkUrl)
           }
           return@withContext
         }
       }
-
       withContext(Dispatchers.Main) {
-        onSuccess(currentVersion, false, emptyList(), "", "", null, null, null)
+        onSuccess(BuildConfig.VERSION_NAME, false, emptyList(), "", "", null, null, null)
       }
     } catch (e: Exception) {
-      Log.e("UpdateCheck", "Error checking for updates: ${e.message}", e)
+      Log.e("NikaUpdater", "Update check failed", e)
       withContext(Dispatchers.Main) { onError() }
     }
   }

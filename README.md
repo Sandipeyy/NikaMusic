@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Sandipeyy/NikaMusicBeta/releases/latest"><img alt="Download" src="https://img.shields.io/badge/Download-APK-6C4DFF?style=for-the-badge&logo=android&logoColor=white"/></a>
+  <a href="https://github.com/Sandipeyy/NikaMusic/releases/latest"><img alt="Download" src="https://img.shields.io/badge/Download-APK-6C4DFF?style=for-the-badge&logo=android&logoColor=white"/></a>
   <img alt="License" src="https://img.shields.io/badge/License-GPL--3.0-blue?style=for-the-badge"/>
   <img alt="Android" src="https://img.shields.io/badge/Android-8.0%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white"/>
 </p>
@@ -21,7 +21,7 @@
 
 ## Download
 
-1. Open the [**latest release**](https://github.com/Sandipeyy/NikaMusicBeta/releases/latest).
+1. Open the [**latest release**](https://github.com/Sandipeyy/NikaMusic/releases/latest).
 2. Under **Assets**, download **`NikaMusic.apk`** (not the "Source code" links).
 3. Open the file and install it. If Android asks, allow installs from your browser or file manager.
 

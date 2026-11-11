@@ -174,7 +174,7 @@ fun AboutScreen(
                 icon = painterResource(R.drawable.github),
                 title = { Text("View GitHub Repository") },
                 description = { Text("Source code and contributions") },
-                onClick = { uriHandler.openUri("https://github.com/Sandipeyy/NikaMusicBeta") }
+                onClick = { uriHandler.openUri("https://github.com/Sandipeyy/NikaMusic") }
               ),
               Material3SettingsItem(
                 icon = painterResource(R.drawable.website),
@@ -317,7 +317,7 @@ private fun AboutAppCard() {
           modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
         )
       }
-      if (BuildConfig.DEBUG) {
+      if (false) {
         Surface(
           shape = RoundedCornerShape(8.dp),
           color = MaterialTheme.colorScheme.error.copy(alpha = 0.10f),
