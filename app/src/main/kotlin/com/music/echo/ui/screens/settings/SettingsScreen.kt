@@ -34,6 +34,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import echo.music.iad1tya.LocalPlayerAwareWindowInsets
 import echo.music.iad1tya.R
@@ -102,6 +106,8 @@ fun SettingsScreen(
       color = MaterialTheme.colorScheme.onBackground,
       modifier = Modifier.padding(start = 8.dp, top = 24.dp, bottom = 16.dp)
     )
+
+    NikaProfileCards(navController)
 
     TextField(
       value = searchQuery,
@@ -489,4 +495,83 @@ fun SettingsScreen(
       }
     }
   )
+}
+
+@Composable
+private fun NikaProfileCards(navController: NavController) {
+  val cs = MaterialTheme.colorScheme
+  val build = echo.music.iad1tya.BuildConfig.VERSION_CODE - 1000
+  Column(
+    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+    verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(10.dp),
+  ) {
+    Surface(
+      shape = RoundedCornerShape(28.dp),
+      color = cs.surfaceContainerLow,
+      modifier = Modifier.fillMaxWidth(),
+    ) {
+      androidx.compose.foundation.layout.Row(
+        modifier = Modifier.padding(20.dp),
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp),
+      ) {
+        androidx.compose.foundation.Image(
+          painter = painterResource(R.drawable.ic_launcher_nobg),
+          contentDescription = null,
+          modifier =
+            Modifier.size(68.dp)
+              .clip(androidx.compose.foundation.shape.CircleShape)
+              .background(androidx.compose.ui.graphics.Color.Black)
+              .padding(14.dp),
+        )
+        Column(verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(2.dp)) {
+          Text(
+            text = "HELLO AGAIN",
+            style = MaterialTheme.typography.labelSmall,
+            color = cs.onSurfaceVariant,
+            letterSpacing = 2.sp,
+          )
+          Text(
+            text = "Sandip",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = cs.onSurface,
+          )
+          Text(
+            text = "Nika Music · build $build",
+            style = MaterialTheme.typography.bodySmall,
+            color = cs.onSurfaceVariant,
+          )
+        }
+      }
+    }
+    Surface(
+      shape = RoundedCornerShape(28.dp),
+      color = cs.surfaceContainerLow,
+      modifier = Modifier.fillMaxWidth(),
+    ) {
+      androidx.compose.foundation.layout.Row(
+        modifier = Modifier.padding(20.dp),
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
+      ) {
+        Column {
+          Text(
+            text = "Version & about app",
+            style = MaterialTheme.typography.bodyMedium,
+            color = cs.onSurfaceVariant,
+          )
+          Text(
+            text = echo.music.iad1tya.BuildConfig.VERSION_NAME,
+            style = MaterialTheme.typography.displaySmall,
+            fontWeight = FontWeight.Bold,
+            color = cs.onSurface,
+          )
+        }
+        FilledTonalButton(onClick = { navController.navigate("settings/about") }) {
+          Text("About app", fontWeight = FontWeight.SemiBold)
+        }
+      }
+    }
+  }
 }

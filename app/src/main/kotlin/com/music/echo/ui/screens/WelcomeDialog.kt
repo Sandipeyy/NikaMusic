@@ -57,6 +57,8 @@ fun WelcomeDialog(onDismissRequest: () -> Unit) {
         // Main Header
         WelcomeAppCard()
 
+        WhatsNewSection()
+
 Spacer(modifier = Modifier.height(4.dp))
 
 Button(
@@ -249,4 +251,53 @@ private fun WelcomeDivider() {
     thickness = 0.5.dp,
     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
   )
+}
+
+@Composable
+private fun WhatsNewSection() {
+  val build = BuildConfig.VERSION_CODE - 1000
+  var notes by remember { mutableStateOf<String?>(null) }
+  LaunchedEffect(Unit) {
+    notes =
+      kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        try {
+          val conn =
+            java.net.URL("https://api.github.com/repos/Sandipeyy/NikaMusic/releases/tags/build-$build")
+              .openConnection()
+          conn.connectTimeout = 8000
+          conn.readTimeout = 8000
+          val json = conn.getInputStream().bufferedReader().use { it.readText() }
+          org.json.JSONObject(json)
+            .optString("body", "")
+            .lines()
+            .filter { it.isNotBlank() && !it.contains("NikaMusic.apk", ignoreCase = true) }
+            .map { l -> l.trim().trimStart('#').trim().replace(Regex("^[-*]\\s+"), "• ") }
+            .joinToString("\n")
+            .trim()
+            .takeIf { it.isNotEmpty() }
+        } catch (e: Exception) {
+          null
+        }
+      }
+  }
+  Column(
+    modifier =
+      Modifier.fillMaxWidth()
+        .clip(RoundedCornerShape(20.dp))
+        .background(MaterialTheme.colorScheme.surfaceContainerLow)
+        .padding(16.dp),
+    verticalArrangement = Arrangement.spacedBy(6.dp),
+  ) {
+    Text(
+      text = "What's new in build $build",
+      style = MaterialTheme.typography.titleSmall,
+      fontWeight = FontWeight.Bold,
+      color = MaterialTheme.colorScheme.primary,
+    )
+    Text(
+      text = notes ?: "Bug fixes and improvements.",
+      style = MaterialTheme.typography.bodyMedium,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+  }
 }

@@ -594,7 +594,7 @@ class MainActivity : ComponentActivity() {
 
             if (isAvailable && getUpdateNotificationsSetting(context)) {
               Log.d("UpdateCheck", "Posting update notification for $latestVersion")
-              UpdateNotificationHelper.showUpdateNotification(context, latestVersion)
+              UpdateNotificationHelper.showUpdateNotification(context, description?.lines()?.firstOrNull { it.isNotBlank() } ?: "Tap to see what's new")
             }
           },
           onError = { Log.e("UpdateCheck", "Startup check failed") }

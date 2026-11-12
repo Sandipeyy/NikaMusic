@@ -100,7 +100,7 @@ fun UpdateAvailableDialog(
             }
 
             Text(
-              text = "Version $version is available",
+              text = "A new update is ready",
               style = MaterialTheme.typography.titleLarge,
               fontWeight = FontWeight.Bold,
             )

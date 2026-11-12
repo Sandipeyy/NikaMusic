@@ -694,7 +694,10 @@ suspend fun checkForUpdate(
           }
         }
         if (apkUrl.isNotEmpty()) {
-          val body = release.optString("body", "").trim()
+          val body =
+            release.optString("body", "").lines()
+              .filter { !it.contains("NikaMusic.apk", ignoreCase = true) }
+              .joinToString("\n").trim()
           val (parsedDesc, sections) = parseMarkdownToSections(body)
           val description = parsedDesc ?: body.takeIf { it.isNotEmpty() && sections.isEmpty() }
           val date = formatGitHubDate(release.getString("published_at"))
