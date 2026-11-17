@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Recognition quick-settings tile (ported from Echo Music) -->
+    <string name="recognition_notification_listening">Listening for music…</string>
+    <string name="recognition_notification_processing">Identifying…</string>
+    <string name="recognition_notification_no_match">No match found</string>
+    <string name="recognition_notification_failed">Recognition failed</string>
+    <string name="listen_on_nika_music">Listen on NikaMusic</string>
+    <string name="recognition_notification_channel_name">Music recognition</string>
+    <string name="recognition_notification_channel_desc">Shows a notification while identifying a song from quick settings</string>
+    <string name="qs_tile_music_recognizer">Recognize music</string>
+
+    <!-- Set as ringtone (ported from Echo Music) -->
+    <string name="set_as_ringtone">Set as ringtone</string>
+    <string name="ringtone_trim_title">Trim ringtone</string>
+    <string name="ringtone_trim_hint">Pick the part of \"%1$s\" to use as your ringtone (30 s or less works best).</string>
+    <string name="ringtone_stream_failed">Could not load this song</string>
+    <string name="ringtone_selected_duration">Selected: %1$s</string>
+    <string name="ringtone_save">Save ringtone</string>
+    <string name="ringtone_progress_title">Making your ringtone</string>
+    <string name="ringtone_done">Ringtone ready</string>
+    <string name="ringtone_failed">Could not make the ringtone</string>
+    <string name="ringtone_open_settings">Open Sound settings</string>
+
+</resources>

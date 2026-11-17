@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Widget.nikamusic" parent="@android:style/Theme.DeviceDefault.DayNight" />
+    <color name="widget_dynamic_accent">@android:color/system_accent1_500</color>
+</resources>

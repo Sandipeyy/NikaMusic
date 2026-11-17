@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="widget_icon_tint">#FFFFFF</color>
+    <color name="widget_text_subtitle">#8E8E93</color>
+    <color name="widget_dynamic_accent">#D0BCFF</color>
+    <color name="widget_progress_track_color">#2C2C30</color>
+    <color name="widget_text_title">#FFFFFF</color>
+    <color name="widget_card_stroke_color">#28282C</color>
+    <color name="widget_vinyl_glass_bg_color">#D9161618</color>
+    <color name="widget_button_bg">#2C2C2E</color>
+    <color name="widget_card_bg_color">#1A1A1C</color>
+</resources>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Widget.nikamusic" parent="@android:style/Theme.DeviceDefault.DayNight">
+        <item name="android:colorBackground">#E6E1E5</item>
+    </style>
+    <color name="widget_icon_tint">#1C1C1E</color>
+    <color name="widget_text_subtitle">#636366</color>
+    <color name="widget_dynamic_accent">#6750A4</color>
+    <color name="widget_progress_track_color">#E5E5EA</color>
+    <color name="widget_text_title">#1C1C1E</color>
+    <color name="widget_card_stroke_color">#E5E5EA</color>
+    <color name="widget_vinyl_glass_bg_color">#EAEAEF</color>
+    <string name="widget_cast">Cast</string>
+    <color name="widget_button_bg">#E5E5EA</color>
+    <color name="widget_card_bg_color">#F2F2F7</color>
+    <string name="widget_options">More options</string>
+    <string name="widget_nika_music">NikaMusic</string>
+    <string name="widget_queue">Queue</string>
+
+    <string name="widget_modern_name">Nika Modern (4×2)</string>
+    <string name="widget_modern_desc">Sleek player with progress bar, favorite, and library controls</string>
+    <string name="widget_square_name">Nika Compact (2×2)</string>
+    <string name="widget_square_desc">Minimal square player with vibrant glowing controls</string>
+    <string name="widget_showcase_name">Nika Showcase (4×4)</string>
+    <string name="widget_showcase_desc">Expanded hero card with full artwork banner and branded header</string>
+    <string name="widget_slim_name">Nika Pill (4×1)</string>
+    <string name="widget_slim_desc">Ultra-compact horizontal strip with live playback progress</string>
+    <string name="widget_vinyl_name">Nika Vinyl Disc (Square)</string>
+    <string name="widget_vinyl_desc">Realistic spinning vinyl turntable with tonearm and frosted dark glass</string>
+    <string name="widget_vintage_name">Nika Vintage Turntable (4×2)</string>
+    <string name="widget_vintage_desc">Warm parchment retro turntable with spinning vinyl disc and chocolate accents</string>
+</resources>
