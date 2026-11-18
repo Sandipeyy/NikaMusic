@@ -27,7 +27,7 @@ jobs:
             rm -rf /tmp/unzipped && mkdir /tmp/unzipped
             unzip -q "$z" -d /tmp/unzipped
 
-            # If the zip holds a single top-level folder (Nika-Bot-main/), use its contents
+            # If the zip holds a single top-level folder (Nika-main/), use its contents
             src=/tmp/unzipped
             if [ "$(ls -A /tmp/unzipped | wc -l)" -eq 1 ] && [ -d "/tmp/unzipped/$(ls -A /tmp/unzipped)" ]; then
               src="/tmp/unzipped/$(ls -A /tmp/unzipped)"
@@ -54,6 +54,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
-            git commit -m "Unzip uploaded archive"
+            git commit -m "Unzip uploaded shitss"
             git push
           fi
