@@ -69,10 +69,7 @@ private val EffectRed = LabColors.Nodes[9]
 
 // the pause, play, forward and backward fades: a picture of the curve, the switch, its length and the layered effect
 @Composable
-fun TransportFadeSection(
-    // with Crossmix on nothing plays a plain crossfade, so blended skips sit out and say so
-    crossmixOn: Boolean = false,
-) {
+fun TransportFadeSection() {
     val (enabled, onEnabledChange) = rememberPreference(TransportFadeEnabledKey, defaultValue = true)
     val (storedSeconds, onSecondsChange) = rememberPreference(TransportFadeSecondsKey, defaultValue = TransportFadeDefaultSeconds)
     val (effect, onEffectChange) = rememberEnumPreference(TransportEffectKey, defaultValue = TransportEffect.OFF)
@@ -96,7 +93,7 @@ fun TransportFadeSection(
         )
         LabToggleRow(
             title = androidx.compose.ui.res.stringResource(com.sandip.nikamusic.R.string.settings_blend_skips),
-            subtitle = stringResource(if (crossmixOn) R.string.settings_blend_skips_crossmix else R.string.settings_blend_skips_desc),
+            subtitle = stringResource(R.string.settings_blend_skips_desc),
             checked = blendSkips,
             onCheckedChange = onBlendSkipsChange,
         )
@@ -107,7 +104,7 @@ fun TransportFadeSection(
         LabCollapsible(enabled || blendSkips) {
             Box(Modifier.padding(horizontal = 6.dp)) {
                 LabSlider(
-                    label = "Length",
+                    label = stringResource(R.string.xmix_length),
                     valueText = secondsText(seconds),
                     value = seconds,
                     onValueChange = { onSecondsChange((it * 2f).roundToInt() / 2f) },
@@ -123,9 +120,9 @@ fun TransportFadeSection(
         LabCollapsible(enabled) {
             Spacer(Modifier.height(14.dp))
             Column(Modifier.padding(horizontal = 6.dp)) {
-                Text("Layered effect", fontFamily = InterFontFamily, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = LabColors.Primary)
+                Text(stringResource(R.string.xmix_layered_effect), fontFamily = InterFontFamily, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = LabColors.Primary)
                 Text(
-                    "A CrossMix effect over the fade, like an echo trail or the record spinning back",
+                    stringResource(R.string.xmix_layered_effect_desc),
                     fontFamily = InterFontFamily,
                     fontSize = 12.sp,
                     lineHeight = 15.sp,
@@ -137,7 +134,7 @@ fun TransportFadeSection(
                 options = TransportEffect.entries.map { it.label },
                 selectedIndex = effect.ordinal,
                 onSelect = { onEffectChange(TransportEffect.entries[it]) },
-                contentDescription = "Choose an effect",
+                contentDescription = stringResource(R.string.xmix_choose_effect),
             )
             Spacer(Modifier.height(4.dp))
         }

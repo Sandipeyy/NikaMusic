@@ -21,6 +21,7 @@ import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
 import com.sandip.nikamusic.LocalDatabase
 import com.sandip.nikamusic.LocalDownloadUtil
+import com.sandip.nikamusic.R
 import com.sandip.nikamusic.constants.KeepScreenOn
 import com.sandip.nikamusic.db.MusicDatabase
 import com.sandip.nikamusic.lyrics.LyricsTranslationHelper
@@ -56,7 +57,7 @@ class PlayerMenuExtras internal constructor(
         when (action) {
             PlayerMenuAction.KEEP_AWAKE -> {
                 setKeepScreenOn(!keepScreenOn)
-                toast(if (keepScreenOn) "The screen can sleep again" else "The screen stays on while NikaMusic is open")
+                toast(context.getString(if (keepScreenOn) R.string.ps_extras_screen_can_sleep else R.string.ps_extras_screen_stays_on))
             }
             PlayerMenuAction.TRANSLATE_LYRICS -> {
                 if (translating) {
@@ -78,7 +79,7 @@ class PlayerMenuExtras internal constructor(
         val song = song ?: return
         if (isActive(PlayerMenuAction.DOWNLOAD)) {
             DownloadService.sendRemoveDownload(context, ExoDownloadService::class.java, song.id, false)
-            toast(if (downloadState == Download.STATE_COMPLETED) "Removed the download" else "Download stopped")
+            toast(context.getString(if (downloadState == Download.STATE_COMPLETED) R.string.ps_extras_download_removed else R.string.ps_extras_download_stopped))
             return
         }
         // the song has to be in the database for its download to be listed and played from there
@@ -88,7 +89,7 @@ class PlayerMenuExtras internal constructor(
             .setData(song.title.toByteArray())
             .build()
         DownloadService.sendAddDownload(context, ExoDownloadService::class.java, request, false)
-        toast("Downloading \"${song.title}\"")
+        toast(context.getString(R.string.ps_extras_downloading, song.title))
     }
 
     private fun toast(text: String) = Toast.makeText(context, text, Toast.LENGTH_SHORT).show()

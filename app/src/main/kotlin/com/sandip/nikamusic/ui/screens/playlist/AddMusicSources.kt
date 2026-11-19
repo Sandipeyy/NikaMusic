@@ -16,7 +16,7 @@ import com.sandip.nikamusic.db.MusicDatabase
 import com.sandip.nikamusic.db.entities.Song
 import com.sandip.nikamusic.models.MediaMetadata
 import com.sandip.nikamusic.ui.component.isImportedFile
-import com.sandip.nikamusic.ui.menu.announceAddedToPlaylist
+import com.sandip.nikamusic.ui.menu.addToPlaylistKeepingSync
 import com.sandip.nikamusic.utils.dataStore
 import com.sandip.nikamusic.utils.get
 import com.music.innertube.YouTube
@@ -183,21 +183,14 @@ private fun <T> interleave(lists: List<List<T>>): List<T> {
  * picks the playlist doesn't have yet, in the order they were ticked. A synced playlist is
  * told about them on YouTube too.
  */
-internal suspend fun addPicksToPlaylist(database: MusicDatabase, playlistId: String, chosen: List<MediaMetadata>) {
+internal suspend fun addPicksToPlaylist(database: MusicDatabase, playlistId: String, chosen: List<MediaMetadata>, context: android.content.Context) {
     val playlist = database.playlist(playlistId).first() ?: return
     val already = database.playlistDuplicates(playlistId, chosen.map { it.id }).toSet()
     val fresh = chosen.filter { it.id !in already }
     if (fresh.isEmpty()) return
     val ids = fresh.map { it.id }
 
-    database.withTransaction {
-        // A playlist can only point at saved songs. For one already saved this does nothing.
-        fresh.forEach { insert(it) }
-        addSongToPlaylist(playlist, ids)
-    }
-    announceAddedToPlaylist(database, playlist, ids)
-
-    playlist.playlist.browseId?.let { browseId ->
-        ids.forEach { YouTube.addToPlaylist(browseId, it) }
-    }
+    // a playlist can only point at saved songs, for one already saved this does nothing
+    database.withTransaction { fresh.forEach { insert(it) } }
+    addToPlaylistKeepingSync(context, database, playlist, ids)
 }

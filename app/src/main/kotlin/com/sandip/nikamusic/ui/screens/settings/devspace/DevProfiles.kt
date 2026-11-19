@@ -52,7 +52,6 @@ import com.sandip.nikamusic.core.updater.InstagramUrl
 import com.sandip.nikamusic.core.updater.ThreadsUrl
 import com.sandip.nikamusic.ui.component.LocalZoomOutOverlayState
 import com.sandip.nikamusic.ui.component.pressBounce
-import com.sandip.nikamusic.ui.screens.donate.showDonateSheet
 import com.sandip.nikamusic.ui.utils.SoftBlurTransformation
 import com.sandip.nikamusic.ui.component.RemoteFocus
 import com.sandip.nikamusic.ui.component.rememberResourcePainter
@@ -142,12 +141,6 @@ internal fun DevProfilePage(
 
             if (person.takesDonations || person.socials.isNotEmpty()) {
                 Column(Modifier.rise(2).padding(top = 22.dp)) {
-                    if (person.takesDonations) {
-                        val popup = LocalZoomOutOverlayState.current
-                        SectionTitle("Donate")
-                        DevLinkRow("Donate me!") { popup.showDonateSheet() }
-                        Spacer(Modifier.height(14.dp))
-                    }
                     if (person.socials.isNotEmpty()) {
                         val context = LocalContext.current
                         SectionTitle("Socials")

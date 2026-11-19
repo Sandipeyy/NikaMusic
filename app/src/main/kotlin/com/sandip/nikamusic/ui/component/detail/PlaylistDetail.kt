@@ -66,6 +66,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -88,6 +89,7 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -252,6 +254,15 @@ fun <A> featuredArtistsOf(
         .sortedByDescending { it.value.size }
         .take(limit)
         .map { (artistId, names) -> FeaturedArtistUi(id = artistId, name = names.first()) }
+
+// the featured artists counted off the main thread, liked songs and the cache run to thousands and made the page hitch as it opened
+@Composable
+fun <A> rememberFeaturedArtists(key: Any?, artists: () -> List<A>, id: (A) -> String?, name: (A) -> String): List<FeaturedArtistUi> {
+    val featured by produceState(emptyList<FeaturedArtistUi>(), key) {
+        value = withContext(Dispatchers.Default) { featuredArtistsOf(artists(), id, name) }
+    }
+    return featured
+}
 
 // passes the scaffold's cover composable down to PlaylistHeader when classic or minimal style draws a framed cover
 internal val LocalPlaylistFramedCover = staticCompositionLocalOf<(@Composable (Modifier) -> Unit)?> { null }
@@ -817,7 +828,7 @@ private fun PlaylistNormalBarRow(
             ) {
                 Icon(
                     painter = painterResource(R.drawable.more_horiz),
-                    contentDescription = "Options",
+                    contentDescription = stringResource(R.string.options),
                     tint = Color.White,
                     modifier = Modifier.size(18.dp),
                 )
@@ -887,7 +898,7 @@ private fun BackPill(
         ) {
             Icon(
                 painter = painterResource(R.drawable.arrow_back_ios),
-                contentDescription = "Back",
+                contentDescription = stringResource(R.string.back_button_desc),
                 tint = Color.White,
                 modifier = Modifier
                     .size(16.dp)
@@ -1037,7 +1048,7 @@ fun PlaylistHeader(
                 Spacer(Modifier.width(9.dp))
                 CircleAction(
                     icon = R.drawable.shuffle,
-                    contentDescription = "Shuffle",
+                    contentDescription = stringResource(R.string.shuffle),
                     onClick = onShuffleClick,
                     spinOnClick = true,
                 )
@@ -1053,7 +1064,7 @@ fun PlaylistHeader(
                     Spacer(Modifier.width(4.dp))
                     CircleAction(
                         icon = if (isSaved) R.drawable.library_add_check else R.drawable.library_add,
-                        contentDescription = if (isSaved) "In your library" else "Add to library",
+                        contentDescription = stringResource(if (isSaved) R.string.pc_in_library else R.string.add_to_library),
                         onClick = onSaveClick,
                     )
                 }
@@ -1177,7 +1188,7 @@ internal fun PlayPill(isPlaying: Boolean, onClick: () -> Unit) {
             label = "playPillLabel",
         ) { playing ->
             Text(
-                text = if (playing) "Pause" else "Play",
+                text = stringResource(if (playing) R.string.pause else R.string.play),
                 style = PillLabelStyle,
                 color = PillContent,
             )
@@ -1370,7 +1381,7 @@ fun <T : Enum<T>> PlaylistSortControl(
                         {
                             Icon(
                                 painter = painterResource(R.drawable.expand_more),
-                                contentDescription = if (descending) "Descending" else "Ascending",
+                                contentDescription = stringResource(if (descending) R.string.pc_sort_descending else R.string.pc_sort_ascending),
                                 tint = Color.White,
                                 modifier = Modifier
                                     .size(18.dp)
@@ -1545,14 +1556,14 @@ fun PlaylistEndOfLine(
                 .height(25.dp)
         ) {
             Text(
-                text = "$songCount ${if (songCount == 1) "SONG" else "SONGS"}",
+                text = pluralStringResource(R.plurals.pc_detail_songs, songCount, songCount).uppercase(),
                 style = ReceiptSmallStyle,
                 color = Color.White.copy(alpha = 0.6f),
                 maxLines = 1,
                 modifier = Modifier.weight(1f),
             )
             Text(
-                text = "END OF LINE",
+                text = stringResource(R.string.pc_detail_end_of_line),
                 style = ReceiptCenterStyle,
                 color = Color.White.copy(alpha = 0.78f),
                 maxLines = 1,
@@ -1560,7 +1571,7 @@ fun PlaylistEndOfLine(
             )
             val minutes = (totalSeconds + 30) / 60
             Text(
-                text = "$minutes ${if (minutes == 1) "MINUTE" else "MINUTES"}",
+                text = pluralStringResource(R.plurals.pc_detail_minutes, minutes, minutes).uppercase(),
                 style = ReceiptSmallStyle,
                 color = Color.White.copy(alpha = 0.6f),
                 maxLines = 1,
@@ -1624,7 +1635,7 @@ fun FeaturedArtistsRow(
     artists: List<FeaturedArtistUi>,
     onArtistClick: (FeaturedArtistUi) -> Unit,
     modifier: Modifier = Modifier,
-    title: String = "Featured Artist",
+    title: String = stringResource(R.string.pc_featured_artist),
     onTitleClick: (() -> Unit)? = null,
     showChevron: Boolean = true,
 ) {

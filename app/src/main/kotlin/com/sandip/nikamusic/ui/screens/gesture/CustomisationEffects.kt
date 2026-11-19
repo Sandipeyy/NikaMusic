@@ -227,19 +227,63 @@ internal fun AnimationSection(modifier: Modifier = Modifier) {
     }
 }
 
-// the four lyric styles to swipe through, each singing on its card as it really would
+// the four lyric styles to swipe through, each singing on its card as it really would, with the readings and the translation they're drawn with under them
 @Composable
 internal fun LyricsStyleSection(modifier: Modifier = Modifier) {
     val (style, onStyle) = rememberEnumPreference(LyricsMotionStyleKey, defaultValue = LyricsMotionStyle.MOTION)
     val names = LyricsMotionStyle.entries.associateWith { stringResource(lyricStyleNameRes(it)) }
-    StylePagerSection(
-        category = stringResource(R.string.customise_lyrics_animation),
-        styles = LyricsMotionStyle.entries,
-        selected = style,
-        nameOf = { names.getValue(it) },
-        onSelect = onStyle,
-        modifier = modifier,
-    ) { LyricsStylePreview(it) }
+    Column(modifier.fillMaxWidth()) {
+        StylePagerSection(
+            category = stringResource(R.string.customise_lyrics_animation),
+            styles = LyricsMotionStyle.entries,
+            selected = style,
+            nameOf = { names.getValue(it) },
+            onSelect = onStyle,
+        ) { LyricsStylePreview(it) }
+        Spacer(Modifier.height(11.dp))
+        LyricsReadingToggles(Modifier.padding(horizontal = CustomisePageMargin))
+    }
+}
+
+// romanisation, the romanisation as the line itself and translation, what every style draws under and over its words, plus the lyrics floating over other apps
+@Composable
+private fun LyricsReadingToggles(modifier: Modifier = Modifier) {
+    val languages = com.sandip.nikamusic.ui.player.RomanizeLanguageKeys.map { rememberPreference(it, defaultValue = true) }
+    val romanize = languages.any { it.value }
+    val (asMain, onAsMain) = rememberPreference(com.sandip.nikamusic.constants.LyricsRomanizeAsMainKey, defaultValue = false)
+    val (translate, onTranslate) = rememberPreference(com.sandip.nikamusic.constants.TranslateLyricsKey, defaultValue = false)
+    val (floating, onFloating) = com.sandip.nikamusic.floating.rememberFloatingLyricsSwitch()
+    com.sandip.nikamusic.ui.screens.audiolab.LabCard(padding = 20.dp, modifier = modifier) {
+        com.sandip.nikamusic.ui.screens.audiolab.LabToggleRow(
+            title = stringResource(R.string.customise_lyrics_romanisation),
+            subtitle = stringResource(R.string.customise_lyrics_romanisation_desc),
+            checked = romanize,
+            onCheckedChange = { on -> languages.forEach { it.value = on } },
+        )
+        com.sandip.nikamusic.ui.screens.audiolab.LabToggleRow(
+            title = stringResource(R.string.settings_romanize_as_main),
+            subtitle = stringResource(R.string.settings_romanize_as_main_desc),
+            checked = asMain,
+            onCheckedChange = onAsMain,
+            enabled = romanize,
+        )
+        com.sandip.nikamusic.ui.screens.audiolab.LabToggleRow(
+            title = stringResource(R.string.customise_lyrics_translation),
+            subtitle = stringResource(R.string.customise_lyrics_translation_desc),
+            checked = translate,
+            onCheckedChange = { on ->
+                onTranslate(on)
+                // takes effect on the song playing now, not only from the next one
+                if (on) com.sandip.nikamusic.lyrics.LyricsTranslationHelper.triggerManualTranslation() else com.sandip.nikamusic.lyrics.LyricsTranslationHelper.triggerClearTranslations()
+            },
+        )
+        com.sandip.nikamusic.ui.screens.audiolab.LabToggleRow(
+            title = stringResource(R.string.settings_floating_lyrics),
+            subtitle = stringResource(R.string.settings_floating_lyrics_desc),
+            checked = floating,
+            onCheckedChange = onFloating,
+        )
+    }
 }
 
 // a lyric style's name in the app's language

@@ -59,12 +59,14 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.C
 import androidx.media3.common.Player
 import com.sandip.nikamusic.LocalPlayerConnection
+import com.sandip.nikamusic.R
 import com.sandip.nikamusic.constants.PlayerHorizontalPadding
 import com.sandip.nikamusic.ui.component.SeekBarExpandSpring
 import com.sandip.nikamusic.utils.makeTimeString
@@ -270,7 +272,7 @@ fun PlayerProgressSlider(
                 LoadingLabel(style = timeStyle, color = restColor)
             } else if (state == FailureKey) {
                 Text(
-                    text = failureLabel ?: "Error",
+                    text = failureLabel ?: stringResource(R.string.error_title),
                     style = timeStyle,
                     color = StreamFailureRed,
                     maxLines = 1,
@@ -453,7 +455,7 @@ private fun rememberSettled(value: Boolean): State<Boolean> = produceState(initi
 private fun LoadingLabel(style: TextStyle, color: Color) {
     val transition = rememberInfiniteTransition(label = "loadingLabel")
     Row(verticalAlignment = Alignment.Bottom) {
-        Text(text = "Loading", style = style, color = color, maxLines = 1)
+        Text(text = stringResource(R.string.pc_loading), style = style, color = color, maxLines = 1)
         repeat(3) { index ->
             val lit by transition.animateFloat(
                 initialValue = 0.15f,

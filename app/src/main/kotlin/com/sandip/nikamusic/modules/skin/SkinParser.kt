@@ -40,7 +40,8 @@ internal object SkinParser {
     private fun glass(o: JsonObject): SkinGlass? {
         val shader = o.string("shader")?.takeIf { name -> ShaderKinds.any { name.endsWith(it, ignoreCase = true) } } ?: return null
         val change = glassChange(o)
-        return SkinGlass(shader, change.blurDp ?: 6f, change.marginDp ?: 16f, change.uniforms)
+        // a glass that draws its own edge can turn off nika's hairline and shadow, or the bars get two edges
+        return SkinGlass(shader, change.blurDp ?: 6f, change.marginDp ?: 16f, change.uniforms, outline = o.bool("outline") ?: true, shadow = o.bool("shadow") ?: true)
     }
 
     /** a blur, a margin and uniforms, as the glass and a setting's option both write them; nika's own uniforms can't be set this way */
@@ -50,7 +51,10 @@ internal object SkinParser {
         uniforms = shaderUniforms(o["uniforms"], NikaUniforms),
     )
 
-    private fun font(o: JsonObject): SkinFont? = o.string("regular")?.let { SkinFont(regular = it, bold = o.string("bold")) }
+    // "scope": "app" puts the font everywhere; left out, it stays on the module's player
+    private fun font(o: JsonObject): SkinFont? = o.string("regular")?.let {
+        SkinFont(regular = it, bold = o.string("bold"), wholeApp = o.string("scope")?.lowercase() == "app")
+    }
 
     // ---- pages --------------------------------------------------------------------------------
 
@@ -168,5 +172,5 @@ internal object SkinParser {
     // what nika hands every page shader itself
     val PageUniforms = setOf("size", "time", "density", "touch", "pressed", "accent")
     // what nika hands every glass shader itself
-    val NikaUniforms = setOf("content", "size", "margin", "radius", "density", "quality", "chrome", "accent", "kind")
+    val NikaUniforms = setOf("content", "size", "margin", "radius", "density", "quality", "chrome", "accent", "kind", "pill", "pillShown", "pillLift")
 }

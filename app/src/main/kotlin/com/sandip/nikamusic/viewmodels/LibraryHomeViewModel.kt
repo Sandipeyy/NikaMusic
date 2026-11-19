@@ -5,6 +5,7 @@ package com.sandip.nikamusic.viewmodels
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sandip.nikamusic.R
 import com.sandip.nikamusic.constants.AlbumSortType
 import com.sandip.nikamusic.constants.AlbumsFromLikedSongsKey
 import com.sandip.nikamusic.constants.ArtistSortType
@@ -17,8 +18,10 @@ import com.sandip.nikamusic.db.entities.SpeedDialItem
 import com.sandip.nikamusic.importer.ImportProgress
 import com.sandip.nikamusic.importer.ImportSource
 import com.sandip.nikamusic.importer.MusicImportService
+import com.sandip.nikamusic.importer.LocalSongRepair
 import com.sandip.nikamusic.importer.groupLocalAlbums
 import com.sandip.nikamusic.playback.CachedSongs
+import com.sandip.nikamusic.ui.component.TopToaster
 import com.sandip.nikamusic.utils.ArtistImageResolver
 import com.sandip.nikamusic.utils.dataStore
 import com.music.innertube.YouTube
@@ -185,6 +188,12 @@ constructor(
 
         // files imported before local albums existed get theirs here, after that it finds nothing to do
         viewModelScope.launch(Dispatchers.IO) {
+            // songs titled by their link ("1234") get their real name first, and once after an update the covers and lyrics beside them
+            runCatching { LocalSongRepair.repairOnOpen(context, database) }
+                .onSuccess { fixed ->
+                    if (fixed > 0) TopToaster.show(context.resources.getQuantityString(R.plurals.lib_local_repaired, fixed, fixed), iconRes = R.drawable.library_music)
+                }
+                .onFailure { timber.log.Timber.w(it, "Repairing local song names failed") }
             runCatching { groupLocalAlbums(context, database) }
                 .onFailure { timber.log.Timber.w(it, "Grouping local albums failed") }
         }

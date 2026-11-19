@@ -22,4 +22,5 @@
     <string name="ringtone_failed">Could not make the ringtone</string>
     <string name="ringtone_open_settings">Open Sound settings</string>
 
+    <string name="ai_song_insights">Song insights (AI)</string>
 </resources>

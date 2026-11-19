@@ -1,4 +1,4 @@
-# audio pass's native half: the direct usb driver and the aaudio exclusive output, one small library with no third-party code
+# the native halves of audio: pass (the direct usb driver and the aaudio exclusive output) and 3d sims (the room), each its own small library with no third-party code
 cmake_minimum_required(VERSION 3.22.1)
 project(nikapass LANGUAGES CXX)
 
@@ -11,3 +11,8 @@ target_compile_options(nikapass PRIVATE -O2 -Wall -fvisibility=hidden)
 target_link_libraries(nikapass log dl)
 # 16 kb pages on android 15 phones need the segments aligned to them
 target_link_options(nikapass PRIVATE "-Wl,-z,max-page-size=16384")
+
+add_library(nikastage SHARED stage/splitter.cpp stage/hrtf.cpp stage/tail.cpp stage/engine.cpp stage/stage_jni.cpp)
+# o3 lets the compiler vectorise the ear filters, the biggest cost of the room
+target_compile_options(nikastage PRIVATE -O3 -ffp-contract=fast -Wall -fvisibility=hidden)
+target_link_options(nikastage PRIVATE "-Wl,-z,max-page-size=16384")

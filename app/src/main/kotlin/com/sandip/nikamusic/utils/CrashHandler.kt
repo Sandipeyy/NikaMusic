@@ -44,7 +44,7 @@ class CrashHandler private constructor(
         }.toString()
 
         return buildString {
-            appendLine("nika Crash Report")
+            appendLine("NikaMusic Crash Report")
             appendLine("=".repeat(50))
             appendLine()
             appendLine("Manufacturer: ${Build.MANUFACTURER}")

@@ -55,7 +55,7 @@ import com.sandip.nikamusic.ui.component.detail.PlaylistSortControl
 import com.sandip.nikamusic.ui.component.detail.PlaylistModeBar
 import com.sandip.nikamusic.ui.component.detail.PlaylistSelectTick
 import com.sandip.nikamusic.ui.component.detail.PlaylistTrackRow
-import com.sandip.nikamusic.ui.component.detail.featuredArtistsOf
+import com.sandip.nikamusic.ui.component.detail.rememberFeaturedArtists
 import com.sandip.nikamusic.ui.component.librarySwipeAction
 import com.sandip.nikamusic.ui.component.queueSwipeAction
 import com.sandip.nikamusic.ui.component.rememberRevealSeenState
@@ -131,9 +131,7 @@ fun CachePlaylistScreen(
     }
 
     val totalSeconds = remember(sortedSongs) { sortedSongs.sumOf { it.song.duration } }
-    val featuredArtists = remember(sortedSongs) {
-        featuredArtistsOf(sortedSongs.flatMap { it.artists }, id = { it.id }, name = { it.name })
-    }
+    val featuredArtists = rememberFeaturedArtists(sortedSongs, { sortedSongs.flatMap { it.artists } }, id = { it.id }, name = { it.name })
     val downloadState = rememberSongsDownloadState(remember(sortedSongs) { sortedSongs.map { it.song.id } })
     val isThisQueue = queueTitle == title
 
@@ -158,7 +156,7 @@ fun CachePlaylistScreen(
         searchPlaceholder = "Search cached songs",
         onBackClick = { navController.navigateUp() },
         onBackLongClick = { navController.backToMain() },
-        creator = "nika",
+        creator = "NikaMusic",
         onMoreClick = {
             menuState.show {
                 CachePlaylistMenu(

@@ -405,7 +405,7 @@
     <string name="karaoke">卡拉OK</string>
     <string name="apple_music_style">Apple Music</string>
     <string name="apple_music_style_letter">Apple Music V2 (Letter by Letter)</string>
-    <string name="nika_1">nika (Fluid)</string>
+    <string name="nika_1">NikaMusic (Fluid)</string>
     <string name="apple_music_lyrics_blur">Apple Music Lyrics Blur</string>
     <string name="apple_music_lyrics_blur_desc">Apply blur to inactive lyrics lines for a premium focus effect</string>
     <string name="lyrics_v2_fluid">Lyrics V2 (Fluid)</string>
@@ -435,19 +435,19 @@
     <string name="wrapped_total_artists_subtitle">独特的音乐人</string>
     <string name="wrapped_total_songs_title">您听了</string>
     <string name="wrapped_total_songs_subtitle">独特的歌曲</string>
-    <string name="wrapped_intro_title">nika</string>
+    <string name="wrapped_intro_title">NikaMusic</string>
     <string name="wrapped_intro_subtitle">是时候看看您最近听了什么了</string>
     <string name="wrapped_intro_button">让我们开始吧!</string>
-    <string name="wrapped_end_thanks">感谢您使用 nika 听歌!</string>
+    <string name="wrapped_end_thanks">感谢您使用 NikaMusic 听歌!</string>
     <string name="wrapped_end_create_playlist">创建您的年度总结播放列表</string>
     <string name="wrapped_end_creating_playlist">正在创建…</string>
     <string name="wrapped_end_playlist_saved">播放列表已保存</string>
-    <string name="wrapped_logo_content_description">nika 徽标</string>
+    <string name="wrapped_logo_content_description">NikaMusic 徽标</string>
     <string name="wrapped_year">2025</string>
     <string name="wrapped_ready_title">您的年度总结已准备好！</string>
     <string name="wrapped_ready_subtitle">是时候看看您今年最喜欢什么了.</string>
     <string name="wrapped_thank_you">谢谢您的聆听</string>
-    <string name="wrapped_special_thanks">特别感谢 MO Agamy 创建了 nika</string>
+    <string name="wrapped_special_thanks">特别感谢 MO Agamy 创建了 NikaMusic</string>
     <string name="wrapped_close">关闭年度总结</string>
     <string name="wrapped_playlist_title">您的 %s 年度总结</string>
     <string name="wrapped_create_playlist">创建播放列表</string>
@@ -480,7 +480,7 @@
     <string name="eq_label_mid">Mids</string>
     <string name="eq_label_treble">Treble</string>
     <string name="eq_preset_flat">Flat</string>
-    <string name="eq_preset_nika_signature">nika Signature</string>
+    <string name="eq_preset_nika_signature">NikaMusic Signature</string>
     <string name="eq_preset_acoustic">Acoustic</string>
     <string name="eq_preset_spatial">3D Stage</string>
     <string name="eq_preset_bass_boost">Bass Boost</string>
@@ -499,7 +499,7 @@
     <string name="eq_preset_dirac_game">Dirac Game</string>
     <string name="eq_enable_title">nikaEqualizer</string>
     <string name="eq_enable_summary">Toggle professional audio processing</string>
-    <string name="eq_label_nika">nika Signature</string>
+    <string name="eq_label_nika">NikaMusic Signature</string>
     <string name="eq_label_dolby">Dolby Atmos</string>
     <string name="eq_label_dirac">Dirac Audio</string>
     <string name="eq_reset">Reset</string>
@@ -516,9 +516,9 @@
     <string name="plays">plays</string>
     <string name="casting_to">转换为 %s</string>
     <string name="progress_percent">进度 %s%%</string>
-    <string name="listening_to_nika">收听 nika</string>
+    <string name="listening_to_nika">收听 NikaMusic</string>
     <string name="listen_on_youtube_music">在 YouTube Music 上收听</string>
-    <string name="visit_nika">访问 nika</string>
+    <string name="visit_nika">访问 NikaMusic</string>
     <string name="open">打开</string>
     <string name="failed_to_create_image">无法创建图片：%s</string>
     <string name="copied_title">已复制标题</string>
@@ -533,13 +533,13 @@
     <!-- Widget strings -->
     <string name="album_art">专辑封面</string>
     <string name="no_song_playing">没有音乐正在播放</string>
-    <string name="tap_to_open">点击打开 nika</string>
+    <string name="tap_to_open">点击打开 NikaMusic</string>
     <string name="previous">上一曲</string>
     <string name="play_pause">播放/暂停</string>
     <string name="next">下一曲</string>
     <string name="like">喜欢</string>
     <string name="not_playing">未在播放歌曲</string>
-    <string name="tap_to_play">点击打开 nika</string>
+    <string name="tap_to_play">点击打开 NikaMusic</string>
     <string name="widget_description">带播放控制的音乐播放器小部件</string>
     <string name="queue_widget_description">带队列预览的音乐播放器</string>
     <string name="turntable_widget_description">带有播放和点赞控制按钮的播放控件</string>
@@ -693,7 +693,7 @@
     <string name="crash_share_logs">分享日志</string>
     <string name="copy_logs">Copy Logs</string>
     <string name="crash_share_title">分享崩溃报告</string>
-    <string name="crash_report_subject">nika 崩溃报告</string>
+    <string name="crash_report_subject">NikaMusic 崩溃报告</string>
     <string name="crash_close">关闭</string>
     <string name="crash_no_log">没有可用的崩溃日志</string>
     <!-- Theme Palette Names -->
@@ -742,7 +742,7 @@
     <string name="delete_from_history">从历史中删除</string>
     <string name="re_listen">重新识别</string>
     <string name="hold_to_recognize">按住搜索图标识别音乐</string>
-    <string name="play_on_app">在 nika 上播放</string>
+    <string name="play_on_app">在 NikaMusic 上播放</string>
     <string name="recognized_track">已识别曲目</string>
     <!-- CSV Import Strings -->
     <string name="map_csv_columns">映射 CSV 列</string>
@@ -779,7 +779,7 @@
     <string name="discord_rpc_preview">Rich Presence 预览</string>
     <string name="discord_presence">在场</string>
     <string name="discord_connect_description">使用 Discord 登录来分享你正在收听的内容</string>
-    <string name="discord_playing_nika">播放 nika</string>
+    <string name="discord_playing_nika">播放 NikaMusic</string>
     <string name="discord_watching_nika">观看nika</string>
     <string name="discord_competing_nika">参与nika评选</string>
     <string name="discord_activity_name">活动名称</string>
@@ -834,14 +834,14 @@
     <string name="get_started">Get Started</string>
     <string name="perm_required">Required</string>
     <string name="perm_permissions">Permissions</string>
-    <string name="perm_intro_text">These permissions are required for nika to function correctly. Please grant them to proceed.</string>
+    <string name="perm_intro_text">These permissions are required for NikaMusic to function correctly. Please grant them to proceed.</string>
     <string name="perm_notif_title">Notifications</string>
     <string name="perm_notif_desc">Know immediately when your music is playing and control it from the notification bar.</string>
     <string name="perm_install_title">App Installation</string>
     <string name="perm_install_desc">Required to download and install app updates seamlessly.</string>
     <string name="feat_discover">Discover</string>
     <string name="feat_features">Features</string>
-    <string name="feat_intro">Explore everything nika has to offer for your music journey.</string>
+    <string name="feat_intro">Explore everything NikaMusic has to offer for your music journey.</string>
     <string name="feat_lyrics_title">Smart Lyrics</string>
     <string name="feat_lyrics_desc">Enjoy synchronized, word-by-word lyrics for millions of songs.</string>
     <string name="feat_download_title">Offline Playback</string>
@@ -859,7 +859,7 @@
     <string name="welcome_update_status">Updated</string>
     <string name="welcome_update_intro">Ensuring you have the latest features and security improvements.</string>
     <string name="welcome_checking_updates">Checking for updates…</string>
-    <string name="welcome_up_to_date">nika is up to date!</string>
+    <string name="welcome_up_to_date">NikaMusic is up to date!</string>
     <string name="welcome_update_available">New version is available: %s</string>
     <string name="welcome_everything_ready">Everything is now up to date</string>
     <string name="commits_title">Commits</string>

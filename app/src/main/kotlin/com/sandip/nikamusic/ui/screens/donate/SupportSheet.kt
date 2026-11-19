@@ -1,4 +1,4 @@
-// the "support nika's development" sheet: the auto prompt, help us! on the version sheet, and support me on about app all open this
+// the "support NikaMusic's development" sheet: the auto prompt asks people to star the repo
 
 package com.sandip.nikamusic.ui.screens.donate
 
@@ -30,10 +30,10 @@ import com.sandip.nikamusic.ui.component.PopupSheetHandleHeight
 import com.sandip.nikamusic.ui.component.PopupSheetState
 import com.sandip.nikamusic.ui.screens.update.openUrl
 
-// the band ends around her chest, above where her fade starts (56%), or the letters show through her
-private const val BandEndsOnCharacter = 0.53f
+// how tall the blue name band is below the handle row
+private val BandBody = 150.dp
 
-/** shows the support sheet, donate us! pushes the donate sheet on top of it */
+/** shows the support sheet */
 fun PopupSheetState.showSupportSheet() {
     val popup = this
     show(fullBleed = true, buttonBar = { SupportButtons(popup) }) {
@@ -45,8 +45,7 @@ fun PopupSheetState.showSupportSheet() {
 private fun SupportSheetContent() {
     val scroll = rememberScrollState()
     BoxWithConstraints(Modifier.fillMaxWidth()) {
-        val characterWidth = characterWidth(maxWidth, maxHeight)
-        val bandHeight = PopupSheetHandleHeight + CharacterTop + characterWidth * CharacterAspect * BandEndsOnCharacter
+        val bandHeight = PopupSheetHandleHeight + CharacterTop + BandBody
 
         NameMarquee(
             modifier = Modifier
@@ -66,9 +65,8 @@ private fun SupportSheetContent() {
                 .verticalScroll(scroll)
                 .padding(horizontal = 26.dp),
         ) {
-            Spacer(Modifier.height(CharacterTop))
-            DonateCharacter(width = characterWidth)
-            Spacer(Modifier.height(14.dp))
+            // the band's room, where the logo used to be
+            Spacer(Modifier.height(CharacterTop + BandBody + 16.dp))
             Text(
                 text = "Enjoying NikaMusic?",
                 fontSize = 13.sp,
@@ -88,8 +86,7 @@ private fun SupportSheetContent() {
             Spacer(Modifier.height(14.dp))
             Text(
                 text = "thanks for trying it out! btw, NikaMusic will always be free, forever yours! <3\n\n" +
-                    "It would be very useful for us if you support the developer, no matter how small it is!! <3\n" +
-                    "giving a star to NikaMusic’s repo is already enough. and thanks again!",
+                    "giving a star to NikaMusic’s repo is the best way to support it, and it takes one tap. thanks again!",
                 fontSize = 13.5.sp,
                 lineHeight = 18.sp,
                 fontWeight = FontWeight.Bold,
@@ -105,20 +102,12 @@ private fun SupportSheetContent() {
 private fun SupportButtons(popup: PopupSheetState) {
     val context = LocalContext.current
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            DonatePillButton(
-                text = "Donate Us!",
-                onClick = { popup.showDonateSheet() },
-                modifier = Modifier.weight(1f),
-            )
-            DonatePillButton(
-                text = "Star the repo!",
-                onClick = { context.openUrl(GithubRepoUrl) },
-                modifier = Modifier.weight(1f),
-            )
-        }
         DonatePillButton(
-            text = "get these beggar outta here, No!",
+            text = "Star the repo!",
+            onClick = { context.openUrl(GithubRepoUrl) },
+        )
+        DonatePillButton(
+            text = "Maybe later",
             onClick = popup::dismiss,
             quiet = true,
         )

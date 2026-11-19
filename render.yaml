@@ -1,0 +1,12 @@
+# Render blueprint for the Listen together backend: New + -> Blueprint -> pick this repo.
+# Afterwards copy the service's address (https://NAME.onrender.com) and add it as the repository secret
+# LISTEN_TOGETHER_SERVER with https:// replaced by wss://, e.g. wss://NAME.onrender.com
+services:
+  - type: web
+    name: nikamusic-listen-together
+    runtime: node
+    rootDir: server/listen-together
+    buildCommand: npm install
+    startCommand: npm start
+    plan: free
+    healthCheckPath: /

@@ -113,6 +113,7 @@ val EnablePaxsenixKey = booleanPreferencesKey("enablePaxsenix")
 val EnableNetEaseKey = booleanPreferencesKey("enableNetEase")
 val EnableQQMusicKey = booleanPreferencesKey("enableQQMusic")
 val EnableDeezerKey = booleanPreferencesKey("enableDeezer")
+val EnableLrcRedKey = booleanPreferencesKey("enableLrcRed")
 val HideExplicitKey = booleanPreferencesKey("hideExplicit")
 val HideVideoSongsKey = booleanPreferencesKey("hideVideoSongs")
 // no switch for it in settings, so every reader defaults it to on and shorts stay out
@@ -161,6 +162,14 @@ val AudioQualityKey = stringPreferencesKey("audioQuality")
 val DataSaverKey = booleanPreferencesKey("dataSaver")
 val DataSaverMobileOnlyKey = booleanPreferencesKey("dataSaverMobileOnly")
 val IpVersionKey = stringPreferencesKey("ipVersion")
+
+// who finds a youtube song's stream: innertubex first with nika's own client walk behind it, or only the walk
+val StreamBackendKey = stringPreferencesKey("streamBackend")
+
+enum class StreamBackend {
+    INNERTUBEX,
+    CLASSIC,
+}
 
 enum class AudioQuality {
     /** Best available from whichever backend is active. */
@@ -250,7 +259,6 @@ val StreamFailureTimeoutKey = intPreferencesKey("streamFailureTimeout")
 val AutoSkipNextOnErrorKey = booleanPreferencesKey("autoSkipNextOnError")
 val StopMusicOnTaskClearKey = booleanPreferencesKey("stopMusicOnTaskClear")
 val ShufflePlaylistFirstKey = booleanPreferencesKey("shufflePlaylistFirst")
-val PreventDuplicateTracksInQueueKey = booleanPreferencesKey("preventDuplicateTracksInQueue")
 val CrossfadeEnabledKey = booleanPreferencesKey("crossfadeEnabled")
 val CrossfadeDurationKey = floatPreferencesKey("crossfadeDuration")
 val CrossfadeGaplessKey = booleanPreferencesKey("crossfadeGapless")
@@ -712,6 +720,12 @@ enum class PlayerStyle(val displayName: String, val selectorName: String) {
     // the two flagships the full editor works on: cover, middle part, controls and bottom bar
     val hasFullEditor: Boolean get() = this == FLAGSHIP || this == CLASSIC
 
+    // the styles whose menu has a rotate button, each with a landscape layout of its own to turn into
+    val turnable: Boolean get() = this == TURNTABLE || this == POSTER || this == TIMELINE || this == LYRICS || this == MODULE || isBedside
+
+    // laid out sideways until someone turns it upright, the way a phone stands on a nightstand
+    val startsSideways: Boolean get() = this == BEDSIDE_TILES
+
     // the looks that read well across a room and stay smooth on a tv's gpu; the rest stay on phones
     val availableOnTv: Boolean get() = this == FLAGSHIP || this == POSTER || this == VIDEO || this == TIMELINE || isBedside
 
@@ -790,6 +804,9 @@ val BedsideLockScreenKey = booleanPreferencesKey("bedsideLockScreen")
 // "not now" on the bedside's lock screen prompt, so it asks once and then leaves it to the sheet
 val BedsideLockPromptDismissedKey = booleanPreferencesKey("bedsideLockPromptDismissed")
 
+// whether a style's rotate button turned it sideways; the same key as before, so a style someone had turned comes back turned
+fun playerStyleRotatedKey(style: PlayerStyle) = booleanPreferencesKey("playerStyleRotated_${style.name}")
+
 // the page each bedside tile was left on, so it opens where it was
 val BedsideMusicTilePageKey = intPreferencesKey("bedsideMusicTilePage")
 val BedsideInfoTilePageKey = intPreferencesKey("bedsideInfoTilePage")
@@ -827,6 +844,8 @@ enum class FlagshipTransportLayout {
     THREE,
     // ten seconds back and forward on the outside, play in a white circle
     TEN_SECONDS,
+    // queue and repeat on the outside, play in a white circle
+    QUEUE_REPEAT,
 }
 
 val FlagshipTransportLayoutKey = stringPreferencesKey("flagshipTransportLayout")
@@ -891,6 +910,11 @@ val ShowLyricsKey = booleanPreferencesKey("showLyrics")
 val SwipeLyricsKey = booleanPreferencesKey("swipeLyrics")
 // the line being sung shown as the title and cover on android auto's player while a car is connected, on unless turned off
 val CarLyricsKey = booleanPreferencesKey("carLyrics")
+// the line being sung floating over other apps in a little pill, off until turned on and allowed to draw over them
+val FloatingLyricsKey = booleanPreferencesKey("floatingLyrics")
+// where the floating lyrics pill was left on screen, in px from the top left; missing until it's first moved
+val FloatingLyricsXKey = intPreferencesKey("floatingLyricsX")
+val FloatingLyricsYKey = intPreferencesKey("floatingLyricsY")
 val EnableLyricsThumbnailPlayPauseKey = booleanPreferencesKey("enableLyricsThumbnailPlayPause")
 val LyricsTextPositionKey = stringPreferencesKey("lyricsTextPosition")
 val LyricsClickKey = booleanPreferencesKey("lyricsClick")
@@ -987,6 +1011,20 @@ val SwipeThumbnailKey = booleanPreferencesKey("swipeThumbnail")
 val RotatingThumbnailKey = booleanPreferencesKey("rotatingThumbnail")
 val CanvasThumbnailAnimationKey = booleanPreferencesKey("canvasThumbnailAnimation")
 val CanvasWifiOnlyKey = booleanPreferencesKey("canvasWifiOnly")
+// which canvas sources get asked first; spotify only joins once it's turned on and signed in on its own page
+val CanvasOrderKey = stringPreferencesKey("canvasOrder")
+val SpotifyCanvasKey = booleanPreferencesKey("spotifyCanvas")
+
+enum class CanvasSource { APPLE_MUSIC, TIDAL, SPOTIFY }
+
+enum class CanvasOrder(val sources: List<CanvasSource>) {
+    APPLE_TIDAL_SPOTIFY(listOf(CanvasSource.APPLE_MUSIC, CanvasSource.TIDAL, CanvasSource.SPOTIFY)),
+    APPLE_SPOTIFY_TIDAL(listOf(CanvasSource.APPLE_MUSIC, CanvasSource.SPOTIFY, CanvasSource.TIDAL)),
+    TIDAL_APPLE_SPOTIFY(listOf(CanvasSource.TIDAL, CanvasSource.APPLE_MUSIC, CanvasSource.SPOTIFY)),
+    TIDAL_SPOTIFY_APPLE(listOf(CanvasSource.TIDAL, CanvasSource.SPOTIFY, CanvasSource.APPLE_MUSIC)),
+    SPOTIFY_APPLE_TIDAL(listOf(CanvasSource.SPOTIFY, CanvasSource.APPLE_MUSIC, CanvasSource.TIDAL)),
+    SPOTIFY_TIDAL_APPLE(listOf(CanvasSource.SPOTIFY, CanvasSource.TIDAL, CanvasSource.APPLE_MUSIC)),
+}
 /** The player's format badge beside the title (OPUS, AAC, FLAC...) */
 val ShowFormatBadgeKey = booleanPreferencesKey("showFormatBadge")
 /** The badge also says the stream's sample rate */
@@ -1308,6 +1346,8 @@ val ChromeGlassStyleKey = stringPreferencesKey("chromeGlassStyle")
 
 enum class ChromeGlassStyle {
     FROSTED,
+    // the built-in liquid glass (ui/component/LiquidGlass.kt), the default
+    LIQUID,
     // the agsl glass the look that's on brings in its zip
     MODULE,
 }
@@ -1337,6 +1377,7 @@ val ForceYtBackdropBlur1500Key = booleanPreferencesKey("forceYtBackdropBlur1500"
 val OfflineModeKey = booleanPreferencesKey("offlineMode")
 val DisableAiFilterKey = booleanPreferencesKey("disableAiFilter")
 val SetupImportCompletedKey = booleanPreferencesKey("setupImportCompleted")
+val HideLibraryImportBannerKey = booleanPreferencesKey("hideLibraryImportBanner")
 
 val LastKnownVersionNameKey = stringPreferencesKey("lastKnownVersionName")
 val LastDonateShownTimeKey = longPreferencesKey("lastDonateShownTime")

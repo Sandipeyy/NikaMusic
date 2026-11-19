@@ -7,6 +7,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- the floating lyrics pill, only asked for when someone turns it on -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <!-- lets android auto draw nika's own player from the media session -->
     <uses-permission android:name="androidx.car.app.MEDIA_TEMPLATES" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -15,6 +17,8 @@
     <!-- the tv link: a quiet background service so a paired tv can reach the phone, and the wi-fi discovery it needs -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+    <!-- android 17 asks before an app reaches other devices on the wi-fi; without it the tv and phone link can't find or reach anything -->
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -115,6 +119,12 @@
             android:theme="@style/Theme.App.Starting"
             android:windowSoftInputMode="adjustResize">
             <!-- not in the launcher itself: one of the icon aliases below is, the one picked in customisation -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="nikamusic" android:host="listen" />
+            </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
@@ -1063,6 +1073,25 @@
             </intent-filter>
         </activity>
 
+        <!-- the module feed's discord sign-in sends the browser back here with a session -->
+        <activity
+            android:name=".modules.browser.ModuleBrowserLoginActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="nika-modules" android:host="signed-in" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
             android:exported="false"
@@ -1077,6 +1106,11 @@
                 <action android:name="androidx.media3.session.MediaSessionService" />
                 <action android:name="androidx.media3.session.MediaLibraryService" />
                 <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+            <!-- vivo's music card on originos (lock screen, atomic island) looks for this before it offers the heart, the loop
+                 button, lyrics and its lists; it still connects with the browser action above (playback/OriginCard.kt) -->
+            <intent-filter>
+                <action android:name="com.vivo.musicwidgetmix.support.service" />
             </intent-filter>
         </service>
 

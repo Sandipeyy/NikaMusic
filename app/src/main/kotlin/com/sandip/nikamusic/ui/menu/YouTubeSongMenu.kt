@@ -318,6 +318,38 @@ fun YouTubeSongMenu(
                             }
                         )
                     } else null,
+                    Material3MenuItemData(
+                        title = { Text(text = stringResource(R.string.ai_song_insights)) },
+                        icon = {
+                            Icon(
+                                painter = painterResource(R.drawable.info),
+                                contentDescription = null,
+                            )
+                        },
+                        onClick = {
+                            onDismiss()
+                            val meta = song.toMediaMetadata()
+                            com.sandip.nikamusic.ai.AiSongController.open(meta.title, meta.artists.joinToString { it.name })
+                        }
+                    ),
+                    if (com.sandip.nikamusic.listentogether.ListenTogetherController.ui.value.let { it.phase == com.sandip.nikamusic.listentogether.ListenPhase.ACTIVE && it.role == com.sandip.nikamusic.listentogether.ListenRole.GUEST }) {
+                        Material3MenuItemData(
+                            title = { Text(text = "Add to room queue") },
+                            icon = {
+                                Icon(
+                                    painter = painterResource(R.drawable.playlist_add),
+                                    contentDescription = null,
+                                )
+                            },
+                            onClick = {
+                                onDismiss()
+                                val meta = song.toMediaMetadata()
+                                com.sandip.nikamusic.listentogether.ListenTogetherController.suggest(
+                                    meta.id, meta.title, meta.artists.joinToString { it.name }
+                                )
+                            }
+                        )
+                    } else null,
                     song.album?.let { album ->
                         Material3MenuItemData(
                             title = { Text(text = stringResource(R.string.view_album)) },

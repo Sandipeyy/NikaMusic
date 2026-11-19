@@ -37,6 +37,7 @@ import com.sandip.nikamusic.utils.reportException
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -49,6 +50,9 @@ import com.sandip.nikamusic.link.isTelevision
 
 // how long after the launch intro the PoToken WebView may boot (Home's reveal runs ~1s)
 private const val PoTokenAfterIntroMillis = 2_500L
+
+// one character from each system fallback font titles commonly reach for: japanese, chinese, korean, emoji
+private const val FallbackFontWarmup = "あ漢한😀"
 
 @HiltAndroidApp
 class App : Application(), SingletonImageLoader.Factory {
@@ -147,6 +151,8 @@ class App : Application(), SingletonImageLoader.Factory {
                 com.sandip.nikamusic.ui.launch.LaunchGate.awaitIntro()
                 kotlinx.coroutines.delay(PoTokenAfterIntroMillis)
                 com.sandip.nikamusic.utils.YTPlayerUtils.preWarmPoToken()
+                // the player script compiles now, so the first song doesn't wait for it
+                com.sandip.nikamusic.utils.YTPlayerUtils.preWarmInnerTubeX()
             }
         }
 
@@ -164,6 +170,12 @@ class App : Application(), SingletonImageLoader.Factory {
             com.sandip.nikamusic.ui.launch.LaunchGate.awaitIntro()
             runCatching { com.sandip.nikamusic.importer.LocalArtwork.repair(this@App, musicDatabase) }
                 .onFailure { Timber.w(it, "Repairing local covers failed") }
+        }
+
+        applicationScope.launch(Dispatchers.Default) {
+            // the first japanese, korean or emoji title loaded its system font inside a scroll frame (6 ms on the avd); here it loads once, off the main thread
+            com.sandip.nikamusic.ui.launch.LaunchGate.awaitIntro()
+            runCatching { android.graphics.Paint().measureText(FallbackFontWarmup) }
         }
     }
 
@@ -198,6 +210,8 @@ class App : Application(), SingletonImageLoader.Factory {
 
         YouTube.useLoginForBrowse = settings[UseLoginForBrowse] ?: true
         YouTube.ipVersion = settings[IpVersionKey]?.toEnum(defaultValue = IpVersion.AUTO) ?: IpVersion.AUTO
+        com.sandip.nikamusic.utils.YTPlayerUtils.backend =
+            settings[StreamBackendKey]?.toEnum(defaultValue = StreamBackend.INNERTUBEX) ?: StreamBackend.INNERTUBEX
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
@@ -298,13 +312,28 @@ class App : Application(), SingletonImageLoader.Factory {
                     YouTube.ipVersion = ipVersion?.toEnum(defaultValue = IpVersion.AUTO) ?: IpVersion.AUTO
                 }
         }
+
+        applicationScope.launch(Dispatchers.IO) {
+            dataStore.data
+                .map { it[StreamBackendKey]?.toEnum(defaultValue = StreamBackend.INNERTUBEX) ?: StreamBackend.INNERTUBEX }
+                .distinctUntilChanged()
+                .collectIndexed { index, backend ->
+                    com.sandip.nikamusic.utils.YTPlayerUtils.backend = backend
+                    // a switch mid-session warms it straight away; at launch that waits for the intro, further up
+                    if (index > 0) com.sandip.nikamusic.utils.YTPlayerUtils.preWarmInnerTubeX()
+                }
+        }
     }
 
-    // the screen went to the background: covers decoded for it were the most the app held while music played on, so most of them go; the latest stay for coming back
+    // covers are the most the app holds: half go when the phone runs short, most when the screen goes to the background, all once the system starts reclaiming background apps
+    @Suppress("DEPRECATION")
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
-        if (level == android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
-            SingletonImageLoader.get(this).memoryCache?.let { cache -> cache.trimToSize(cache.size / 4) }
+        val cache = SingletonImageLoader.get(this).memoryCache ?: return
+        when {
+            level >= android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND -> cache.clear()
+            level >= android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN -> cache.trimToSize(cache.size / 4)
+            level >= android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW -> cache.trimToSize(cache.size / 2)
         }
     }
 
@@ -315,6 +344,7 @@ class App : Application(), SingletonImageLoader.Factory {
         return ImageLoader.Builder(this).apply {
             components {
                 add(SvgDecoder.Factory())
+                add(com.sandip.nikamusic.utils.ImageRetry)
             }
             // covers ease in as they arrive; coil skips the fade for ones already in memory, so scrolling back never flickers
             crossfade(300)

@@ -34,6 +34,9 @@ import com.sandip.nikamusic.utils.rememberPreference
 /** How much of the chrome colour covers the blurred app. */
 private const val FrostTintAlpha = 0.78f
 
+/** The liquid look on Android 12 or with blur off: the same frost, but more see-through. */
+private const val LiquidFallbackTintAlpha = 0.58f
+
 /** The hairline is 2 real pixels on every screen, not 2dp: any thicker and it reads as a border. */
 private const val ChromeOutlineWidthPx = 2f
 private val ChromeOutlineColor = Color.White.copy(alpha = 0.05f)
@@ -81,15 +84,15 @@ fun FrostedChromeGlass(
     modifier: Modifier = Modifier,
     // which bar this is, so a look's glass shader can draw each one its own way
     surface: ChromeSurface = ChromeSurface.NavBar,
+    // the lit tab's pill for a glass that draws it, given the bar's size; read while drawing
+    pill: ((Size) -> ChromePill?)? = null,
 ) {
-    // a look module can swap the frost for a glass shader of its own; android 13+ runs it, older phones and blur switched off keep the frost
-    val (style) = rememberEnumPreference(ChromeGlassStyleKey, defaultValue = ChromeGlassStyle.FROSTED)
-    val (blurOff) = rememberPreference(DisableBlurKey, defaultValue = false)
-    val moduleGlass = com.sandip.nikamusic.modules.skin.ActiveSkin.glass
-    if (style == ChromeGlassStyle.MODULE && moduleGlass != null && !blurOff && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-        ModuleChromeGlass(state, moduleGlass, pureBlack, accentWash, surface, modifier)
+    val moduleGlass = rememberChromeModuleGlass()
+    if (moduleGlass != null && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+        ModuleChromeGlass(state, moduleGlass, pureBlack, accentWash, surface, modifier, pill)
         return
     }
+    val (style) = rememberEnumPreference(ChromeGlassStyleKey, defaultValue = ChromeGlassStyle.LIQUID)
     val color = if (pureBlack) Color.Black else GlassChromeColor
     // the grain only matters on the finer, high quality glass
     val grain = LocalBlurQuality.current == com.sandip.nikamusic.constants.BlurQuality.HIGH
@@ -102,7 +105,7 @@ fun FrostedChromeGlass(
         GlassPillBackground(
             state = state,
             blurRadius = { GlassChromeBlurRadius },
-            tint = color.copy(alpha = FrostTintAlpha),
+            tint = color.copy(alpha = if (style == ChromeGlassStyle.LIQUID) LiquidFallbackTintAlpha else FrostTintAlpha),
             foundationColor = color,
             accentWash = accentWash,
             // Only reaches the margin's outer edge now, too far out to show.
@@ -110,6 +113,21 @@ fun FrostedChromeGlass(
             bleed = true,
             modifier = Modifier.fillMaxSize(),
         )
+    }
+}
+
+/** the look's glass while the bars draw it, so a bar can leave out the hairline, shadow or pill the glass draws itself; null while they keep nika's frost */
+@Composable
+internal fun rememberChromeModuleGlass(): com.sandip.nikamusic.modules.skin.ActiveGlass? {
+    // a look module can swap the frost for a glass shader of its own, and without one the built-in liquid glass is the look;
+    // android 13+ runs a shader, older phones and blur switched off keep the frost
+    val (style) = rememberEnumPreference(ChromeGlassStyleKey, defaultValue = ChromeGlassStyle.LIQUID)
+    val (blurOff) = rememberPreference(DisableBlurKey, defaultValue = false)
+    if (blurOff || android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) return null
+    return when (style) {
+        ChromeGlassStyle.MODULE -> com.sandip.nikamusic.modules.skin.ActiveSkin.glass
+        ChromeGlassStyle.LIQUID -> LiquidGlass.get()
+        else -> null
     }
 }
 

@@ -4,6 +4,8 @@ package com.sandip.nikamusic.ui.component
 
 import android.content.Context
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.res.stringResource
+import com.sandip.nikamusic.R
 import com.music.innertube.YouTube
 import com.sandip.nikamusic.db.MusicDatabase
 import com.sandip.nikamusic.db.entities.PlaylistEntity
@@ -54,7 +56,7 @@ fun PopupSheetState.showEditPlaylistSheet(
         buttonBar = {
             val scope = rememberCoroutineScope()
             SheetPillButton(
-                text = if (form.busy) "Saving…" else "Done",
+                text = stringResource(if (form.busy) R.string.pc_saving else R.string.done),
                 enabled = form.name.isNotBlank() && !form.busy,
                 onClick = {
                     form.busy = true

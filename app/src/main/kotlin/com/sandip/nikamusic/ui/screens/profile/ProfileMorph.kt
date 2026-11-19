@@ -322,6 +322,7 @@ internal fun ProfileMorphHost(
         ProfileBackdrop(state)
         UserProfilePage(state, username, photo, cardNumber, nameStyle, navController, viewModel)
         FlyingParts(state, name, photo, cardNumber, nameStyle, nameMaxWidth)
+        ProfileBackButton(state)
     }
 }
 

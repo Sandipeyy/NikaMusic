@@ -13,6 +13,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
+import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -72,7 +73,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import com.sandip.nikamusic.ui.component.WideBarPillGap
 import com.sandip.nikamusic.ui.utils.isWideLayout
 import com.sandip.nikamusic.link.isTelevision
 import com.sandip.nikamusic.ui.utils.stableStatusBars
@@ -200,6 +200,7 @@ import com.sandip.nikamusic.ui.menu.YouTubeSongMenu
 import com.sandip.nikamusic.ui.player.BottomSheetPlayer
 import com.sandip.nikamusic.ui.screens.Screens
 import com.sandip.nikamusic.ui.screens.search.requestSearchFocus
+import com.sandip.nikamusic.ui.screens.search.searchRoute
 import com.sandip.nikamusic.ui.screens.navigationBuilder
 import com.sandip.nikamusic.ui.screens.DarkMode
 import com.sandip.nikamusic.ui.screens.NavigationTab
@@ -235,8 +236,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.net.URLDecoder
-import java.net.URLEncoder
 import javax.inject.Inject
 
 private const val BackgroundZoomOnExpand = true
@@ -394,6 +393,14 @@ class MainActivity : ComponentActivity() {
         playerConnection = null
         // closed for good while the music plays on: the covers decoded for this screen have nothing left to show on
         if (isFinishing) coil3.SingletonImageLoader.get(this).memoryCache?.clear()
+    }
+
+    // home can show the same playlist in two rows, so the card under the finger claims the page's grow animation before the tap lands
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (ev.actionMasked == MotionEvent.ACTION_DOWN) {
+            com.sandip.nikamusic.ui.component.claimContainerTransformAt(androidx.compose.ui.geometry.Offset(ev.x, ev.y))
+        }
+        return super.dispatchTouchEvent(ev)
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -683,7 +690,7 @@ class MainActivity : ComponentActivity() {
                 val onSearch: (String) -> Unit = remember {
                     { searchQuery ->
                         if (searchQuery.isNotEmpty()) {
-                            navController.navigate("search/${URLEncoder.encode(searchQuery, "UTF-8")}")
+                            navController.navigate(searchRoute(searchQuery))
 
                             if (dataStore[PauseSearchHistoryKey] != true) {
                                 lifecycleScope.launch(Dispatchers.IO) {
@@ -741,7 +748,7 @@ class MainActivity : ComponentActivity() {
 
                 // a phone on its side or a tablet: the mini player and the tabs share one pill along the bottom
                 val wideBar = if (isWideLayout()) {
-                    com.sandip.nikamusic.ui.component.rememberWideBar(maxWidth, navigationItems.size)
+                    com.sandip.nikamusic.ui.component.rememberWideBar(maxWidth, maxHeight, navigationItems.size)
                 } else null
                 val miniPill = when {
                     wideBar == null -> com.sandip.nikamusic.ui.component.PhoneMiniPill
@@ -749,14 +756,16 @@ class MainActivity : ComponentActivity() {
                     else -> wideBar.miniAloneFrame
                 }
 
+                // the row the tabs take along the bottom: the wide bar's shrinks with a short screen
+                val navRowHeight = wideBar?.rowHeight ?: NavigationBarHeight
                 val navPadding = if (shouldShowNavigationBar) {
-                    if (slimNav && wideBar == null) SlimNavBarHeight else NavigationBarHeight
+                    if (slimNav && wideBar == null) SlimNavBarHeight else navRowHeight
                 } else {
                     0.dp
                 }
 
                 val navigationBarHeight by animateDpAsState(
-                    targetValue = if (shouldShowNavigationBar) NavigationBarHeight else 0.dp,
+                    targetValue = if (shouldShowNavigationBar) navRowHeight else 0.dp,
                     animationSpec = NavigationBarAnimationSpec,
                     label = "navBarHeight",
                 )
@@ -765,7 +774,7 @@ class MainActivity : ComponentActivity() {
                     dismissedBound = 0.dp,
                     collapsedBound = when {
                         // level with the tabs, in the same pill
-                        wideBar != null && shouldShowNavigationBar -> bottomInset + navPadding - WideBarPillGap
+                        wideBar != null && shouldShowNavigationBar -> bottomInset + navPadding - wideBar.pillGap
                         shouldShowNavigationBar -> bottomInset + navPadding + MiniPlayerHeight
                         else -> bottomInset + MiniPlayerHeight
                     },
@@ -777,13 +786,14 @@ class MainActivity : ComponentActivity() {
                 val sharedBarRow = wideBar != null && shouldShowNavigationBar
                 val playerAwareWindowInsets = remember(
                     bottomInset,
+                    navRowHeight,
                     shouldShowNavigationBar,
                     playerBottomSheetState.isDismissed,
                     sharedBarRow,
                 ) {
                     var bottom = bottomInset
                     if (shouldShowNavigationBar) {
-                        bottom += NavigationBarHeight
+                        bottom += navRowHeight
                     }
                     // in the wide bar the mini player shares the tabs' row, so it takes no room of its own
                     if (!playerBottomSheetState.isDismissed && !sharedBarRow) bottom += MiniPlayerHeight
@@ -800,18 +810,8 @@ class MainActivity : ComponentActivity() {
 
                 LaunchedEffect(navBackStackEntry) {
                     if (inSearchScreen) {
-                        val searchQuery = withContext(Dispatchers.IO) {
-                            val rawQuery = navBackStackEntry?.arguments?.getString("query")
-                            if (!rawQuery.isNullOrEmpty()) {
-                                try {
-                                    URLDecoder.decode(rawQuery, "UTF-8")
-                                } catch (e: IllegalArgumentException) {
-                                    rawQuery
-                                }
-                            } else {
-                                ""
-                            }
-                        }
+                        // navigation already decoded it, see searchRoute
+                        val searchQuery = navBackStackEntry?.arguments?.getString("query").orEmpty()
                         onQueryChange(
                             TextFieldValue(
                                 searchQuery,
@@ -965,6 +965,9 @@ class MainActivity : ComponentActivity() {
                         ),
                     ) {
                     com.sandip.nikamusic.ui.screens.devices.DeviceIntegrationOpener(requests = openDevicesRequests)
+                    // a phone paired before android 17 can't reach its devices until it's allowed on the wi-fi again
+                    val linkPaired = remember { !isTelevision() && com.sandip.nikamusic.link.phone.PhoneLinkHost.hasPairedDevices(this@MainActivity) }
+                    com.sandip.nikamusic.link.AskForLocalNetwork(wanted = linkPaired, onGranted = { phoneLink.get().advertiseAgain() })
                     com.sandip.nikamusic.ui.screens.update.UpdateNotificationOpener(
                         requests = openUpdateRequests,
                         onOpenDevSpace = { personIndex ->
@@ -1072,7 +1075,7 @@ class MainActivity : ComponentActivity() {
                                     { navController.requestSearchFocus() }
                                 }
 
-                                val navBarTotalHeight = bottomInset + NavigationBarHeight
+                                val navBarTotalHeight = bottomInset + navRowHeight
 
                                 if (currentRoute != "wrapped" && currentRoute != "update") {
 
@@ -1115,7 +1118,7 @@ class MainActivity : ComponentActivity() {
                                                     } else {
                                                         val progress = playerBottomSheetState.progress.coerceIn(0f, 1f)
                                                         val slideOffset = totalHeightPx * progress
-                                                        val hideOffset = totalHeightPx * (1 - navBarHeightPx / NavigationBarHeight.toPx())
+                                                        val hideOffset = totalHeightPx * (1 - navBarHeightPx / navRowHeight.toPx())
                                                         slideOffset + hideOffset
                                                     }
                                                 }
@@ -1139,7 +1142,7 @@ class MainActivity : ComponentActivity() {
                                                     totalHeightPx
                                                 } else {
                                                     val slideOffset = totalHeightPx * progress
-                                                    val hideOffset = totalHeightPx * (1 - navBarHeightPx / NavigationBarHeight.toPx())
+                                                    val hideOffset = totalHeightPx * (1 - navBarHeightPx / navRowHeight.toPx())
                                                     slideOffset + hideOffset
                                                 }
 
@@ -1379,7 +1382,8 @@ class MainActivity : ComponentActivity() {
 
                     // "set as ringtone" from any song menu: trimmer and progress dialogs open here
                     com.sandip.nikamusic.ui.component.RingtoneHost()
-                    com.sandip.nikamusic.ui.component.ListenTogetherHost()
+                    com.sandip.nikamusic.ui.component.AiSongHost()
+                    com.sandip.nikamusic.ui.component.ListenTogetherHost(navController)
 
                     HomeUpdatePrompt(currentRoute = currentRoute)
 
@@ -1484,9 +1488,9 @@ class MainActivity : ComponentActivity() {
                 controller.show(WindowInsetsCompat.Type.statusBars())
             }
         }
-        // set before the bar ever hides and left alone after, so hiding it never moves the window off the camera strip
+        // set before the bar ever hides and left alone after, so hiding it never moves the window off the camera strip; on its side the app always fills the strip, android left it a black bar
         LaunchedEffect(hideStatusBar, portrait) {
-            window.drawUnderCutout(hideStatusBar && portrait)
+            window.drawUnderCutout(!portrait || hideStatusBar)
         }
         // A bar a swipe brought back while the player stays open (Samsung's swipe-from-
         // bottom gestures) goes away again after a moment, as the transient one does.
@@ -1589,6 +1593,11 @@ class MainActivity : ComponentActivity() {
         val uri = intent.data ?: intent.extras?.getString(Intent.EXTRA_TEXT)?.toUri() ?: return
         intent.data = null
         intent.removeExtra(Intent.EXTRA_TEXT)
+        // an invite link (nikamusic://listen?code=...&server=...): open the Listen Together page with the form filled in
+        if (uri.scheme == "nikamusic" && uri.host == "listen") {
+            com.sandip.nikamusic.listentogether.ListenTogetherController.handleInvite(uri)
+            return
+        }
         val coroutineScope = lifecycle.coroutineScope
 
         when (val path = uri.pathSegments.firstOrNull()) {
@@ -1618,7 +1627,7 @@ class MainActivity : ComponentActivity() {
 
             "search" -> {
                 uri.getQueryParameter("q")?.let {
-                    navController.navigate("search/${URLEncoder.encode(it, "UTF-8")}")
+                    navController.navigate(searchRoute(it))
                 }
             }
 

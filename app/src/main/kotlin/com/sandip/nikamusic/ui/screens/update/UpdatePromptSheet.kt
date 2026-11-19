@@ -82,7 +82,7 @@ fun UpdatePromptSheet(
         } else {
             needsPermission = true
             readyToInstall = true
-            error = "Allow \"Install unknown apps\" for nika, then tap Install here again."
+            error = "Allow \"Install unknown apps\" for NikaMusic, then tap Install here again."
         }
     }
 

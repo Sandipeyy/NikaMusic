@@ -17,6 +17,12 @@ import com.sandip.nikamusic.eq.autoeq.AutoEqRepository
 import com.sandip.nikamusic.eq.autoeq.AutoEqTuning
 import com.sandip.nikamusic.eq.data.FilterType
 import com.sandip.nikamusic.eq.data.ParametricEQBand
+import com.sandip.nikamusic.eq.stage.StageListener
+import com.sandip.nikamusic.eq.stage.StageNative
+import com.sandip.nikamusic.eq.stage.StageObject
+import com.sandip.nikamusic.eq.stage.StagePresets
+import com.sandip.nikamusic.eq.stage.StageSettings
+import com.sandip.nikamusic.eq.stage.StageSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -59,6 +65,8 @@ class AudioLabViewModel @Inject constructor(
     val playback = store.playback
     val volume = store.volume
     val normalize = store.normalize
+    val stage = store.stage
+    val stageOutput = store.stageOutput
 
     // ---- the user's curve -------------------------------------------------------------------
 
@@ -234,6 +242,51 @@ class AudioLabViewModel @Inject constructor(
 
     fun updateNormalize(transform: (com.sandip.nikamusic.eq.NormalizeSettings) -> com.sandip.nikamusic.eq.NormalizeSettings) =
         store.updateNormalize(transform)
+
+    // ---- 3D Sims ----------------------------------------------------------------------------
+
+    fun updateStage(transform: (StageSettings) -> StageSettings) = store.updateStage(transform)
+
+    /** moves or changes one thing in the room; the preset it came from no longer matches */
+    fun updateStageObject(id: Int, transform: (StageObject) -> StageObject) = store.updateStage { s ->
+        s.copy(objects = s.objects.map { if (it.id == id) transform(it) else it }, presetId = null)
+    }
+
+    fun updateListener(transform: (StageListener) -> StageListener) = store.updateStage { s ->
+        s.copy(listener = transform(s.listener), presetId = null)
+    }
+
+    /** another copy of the sub, set a little to the side of the last one; null when all four are out */
+    fun addSub(): Int? {
+        var added: Int? = null
+        store.updateStage { s ->
+            val subs = s.objects.filter { it.source == StageSource.Sub }
+            if (subs.size >= StageNative.SubSlots) return@updateStage s
+            val last = subs.lastOrNull()
+            val id = (s.objects.maxOfOrNull { it.id } ?: -1) + 1
+            val x = last?.let { if (it.x > 0.5f) it.x - 0.4f else it.x + 0.4f } ?: 0f
+            added = id
+            s.copy(objects = s.objects + StageObject(id, StageSource.Sub, x, last?.y ?: 0.05f, last?.z ?: 0.5f), presetId = null)
+        }
+        return added
+    }
+
+    /** only extra subs can go; the rest of the song always has its place */
+    fun removeStageObject(id: Int) = store.updateStage { s ->
+        val target = s.objects.firstOrNull { it.id == id }
+        if (target?.source != StageSource.Sub || s.objects.count { it.source == StageSource.Sub } <= 1) s
+        else s.copy(objects = s.objects - target, presetId = null)
+    }
+
+    fun applyStagePreset(id: String) {
+        val preset = StagePresets.All.firstOrNull { it.id == id } ?: return
+        store.updateStage { StagePresets.apply(it, preset) }
+    }
+
+    /** null goes back to guessing */
+    fun setOutputKind(key: String, speaker: Boolean?) = store.updateStage { s ->
+        s.copy(outputKinds = if (speaker == null) s.outputKinds - key else s.outputKinds + (key to speaker))
+    }
 
     companion object {
         const val MaxNodes = 16

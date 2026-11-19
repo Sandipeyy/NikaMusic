@@ -408,7 +408,7 @@
     <string name="enable_scrobbling">Enable scrobbling</string>
     <string name="lastfm_now_playing">Send Now Playing</string>
     <string name="last_fm_send_likes">Send Likes/Unlikes</string>
-    <string name="last_fm_send_likes_description">Love/Unlove songs in Last.fm when they are Liked/Unliked in nika</string>
+    <string name="last_fm_send_likes_description">Love/Unlove songs in Last.fm when they are Liked/Unliked in NikaMusic</string>
     <string name="logging_in">Logging in…</string>
 
     <string name="scrobbling_configuration">Scrobbling Configuration</string>
@@ -449,7 +449,7 @@
     <string name="karaoke">Karaoke</string>
     <string name="apple_music_style">Apple Music</string>
     <string name="apple_music_style_letter">Apple Music V2 (Letter by Letter)</string>
-    <string name="nika_1">nika (Fluid)</string>
+    <string name="nika_1">NikaMusic (Fluid)</string>
     <string name="apple_music_lyrics_blur">Apple Music Lyrics Blur</string>
     <string name="apple_music_lyrics_blur_desc">Apply blur to inactive lyrics lines for a premium focus effect</string>
     <string name="lyrics_v2_fluid">Lyrics V2 (Fluid)</string>
@@ -479,19 +479,19 @@
     <string name="wrapped_total_artists_subtitle">unique artists</string>
     <string name="wrapped_total_songs_title">You listened to</string>
     <string name="wrapped_total_songs_subtitle">unique songs</string>
-    <string name="wrapped_intro_title">nika</string>
+    <string name="wrapped_intro_title">NikaMusic</string>
     <string name="wrapped_intro_subtitle">it\'s time to see what you\'ve been listening to</string>
     <string name="wrapped_intro_button">let\'s go!</string>
-    <string name="wrapped_end_thanks">Thanks for listening with nika!</string>
+    <string name="wrapped_end_thanks">Thanks for listening with NikaMusic!</string>
     <string name="wrapped_end_create_playlist">Create Your Wrapped Playlist</string>
     <string name="wrapped_end_creating_playlist">Creating...</string>
     <string name="wrapped_end_playlist_saved">Playlist Saved</string>
-    <string name="wrapped_logo_content_description">nika Logo</string>
+    <string name="wrapped_logo_content_description">NikaMusic Logo</string>
     <string name="wrapped_year">2025</string>
     <string name="wrapped_ready_title">YOUR WRAPPED IS READY!</string>
     <string name="wrapped_ready_subtitle">Time to see what you loved this year.</string>
     <string name="wrapped_thank_you">Thank you for listening</string>
-    <string name="wrapped_special_thanks">Special thanks to nikadh for creating nika</string>
+    <string name="wrapped_special_thanks">Special thanks to realidkroo for creating Mochy Music, the base of NikaMusic</string>
     <string name="wrapped_close">Close wrapped</string>
     <string name="wrapped_playlist_title">Your %s Wrapped</string>
     <string name="wrapped_create_playlist">Create playlist</string>
@@ -530,7 +530,7 @@
     <string name="eq_label_mid">Mids</string>
     <string name="eq_label_treble">Treble</string>
     <string name="eq_preset_flat">Flat</string>
-    <string name="eq_preset_nika_signature">nika Signature</string>
+    <string name="eq_preset_nika_signature">NikaMusic Signature</string>
     <string name="eq_preset_acoustic">Acoustic</string>
     <string name="eq_preset_spatial">3D Stage</string>
     <string name="eq_preset_bass_boost">Bass Boost</string>
@@ -549,7 +549,7 @@
     <string name="eq_preset_dirac_game">Dirac Game</string>
     <string name="eq_enable_title">nikaEqualizer</string>
     <string name="eq_enable_summary">Toggle professional audio processing</string>
-    <string name="eq_label_nika">nika Signature</string>
+    <string name="eq_label_nika">NikaMusic Signature</string>
     <string name="eq_label_dolby">Dolby Atmos</string>
     <string name="eq_label_dirac">Dirac Audio</string>
     <string name="eq_reset">Reset</string>
@@ -567,9 +567,9 @@
     <string name="plays">plays</string>
     <string name="casting_to">Casting to %s</string>
     <string name="progress_percent">Progress %s%%</string>
-    <string name="listening_to_nika">Listening to nika</string>
+    <string name="listening_to_nika">Listening to NikaMusic</string>
     <string name="listen_on_youtube_music">Listen on YouTube Music</string>
-    <string name="visit_nika">Visit nika</string>
+    <string name="visit_nika">Visit NikaMusic</string>
     <string name="open">Open</string>
     <string name="failed_to_create_image">Failed to create image: %s</string>
     <string name="copied_title">Copied Title</string>
@@ -586,13 +586,13 @@
     <!-- Widget strings -->
     <string name="album_art">Album art</string>
     <string name="no_song_playing">No song playing</string>
-    <string name="tap_to_open">Tap to open nika</string>
+    <string name="tap_to_open">Tap to open NikaMusic</string>
     <string name="previous">Previous</string>
     <string name="play_pause">Play/Pause</string>
     <string name="next">Next</string>
     <string name="like">Like</string>
     <string name="not_playing">No song playing</string>
-    <string name="tap_to_play">Tap to open nika</string>
+    <string name="tap_to_play">Tap to open NikaMusic</string>
     <string name="widget_description">Music player widget with playback controls</string>
     <string name="queue_widget_description">Music player with queue preview</string>
     <string name="turntable_widget_description">Circular music widget with play and like controls</string>
@@ -751,7 +751,7 @@
     <string name="crash_share_logs">Share Logs</string>
     <string name="copy_logs">Copy Logs</string>
     <string name="crash_share_title">Share crash report</string>
-    <string name="crash_report_subject">nika Crash Report</string>
+    <string name="crash_report_subject">NikaMusic Crash Report</string>
     <string name="crash_close">Close</string>
     <string name="crash_no_log">No crash log available</string>
 
@@ -803,7 +803,7 @@
     <string name="delete_from_history">Delete from history</string>
     <string name="re_listen">Re-listen</string>
     <string name="hold_to_recognize">Hold search icon to recognize music</string>
-    <string name="play_on_app">Play on nika</string>
+    <string name="play_on_app">Play on NikaMusic</string>
     <string name="recognized_track">Recognized Track</string>
 
     <!-- CSV Import Strings -->
@@ -841,13 +841,15 @@
     <string name="discord_behaviour">Behaviour</string>
     <string name="discord_clear_on_pause">Clear status when paused</string>
     <string name="discord_clear_on_pause_desc">Takes the song off your profile as soon as you pause, and puts it back when you play again.</string>
+    <string name="discord_login_note">Opens Discord\'s own login page in your browser. Your password stays with Discord.</string>
+    <string name="discord_permissions_note">Discord\'s page also lists your friends and invites, because they come bundled with status sharing. NikaMusic only reads your name and picture, and shows what you\'re playing.</string>
     <string name="discord_button_text_variables">Variables: {song_name}, {artist_name}, {album_name}</string>
     <string name="discord_rpc_preview">Rich Presence Preview</string>
     <string name="discord_presence">Presence</string>
     <string name="discord_connect_description">Sign in with Discord to share what you\'re listening to</string>
-    <string name="discord_playing_nika">Playing nika</string>
-    <string name="discord_watching_nika">Watching nika</string>
-    <string name="discord_competing_nika">Competing in nika</string>
+    <string name="discord_playing_nika">Playing NikaMusic</string>
+    <string name="discord_watching_nika">Watching NikaMusic</string>
+    <string name="discord_competing_nika">Competing in NikaMusic</string>
     <string name="discord_activity_name">Activity name</string>
     <string name="discord_activity_name_description">Custom name for the activity (leave empty for default)</string>
     <string name="discord_advanced_mode">Advanced mode</string>
@@ -900,12 +902,37 @@
 
     <!-- Onboarding -->
     <string name="welcome_to">Welcome to</string>
+    <string name="welcome_lets_listen">Let\'s start listening!</string>
+    <string name="welcome_tap_anywhere">Tap anywhere to continue</string>
+    <!-- "welcome" in twenty languages drifting behind the welcome page, the same in every language on purpose -->
+    <string-array name="welcome_words" translatable="false">
+        <item>WELCOME</item>
+        <item>SELAMAT DATANG</item>
+        <item>ようこそ</item>
+        <item>欢迎</item>
+        <item>환영합니다</item>
+        <item>BIENVENIDO</item>
+        <item>BIENVENUE</item>
+        <item>WILLKOMMEN</item>
+        <item>BENVENUTO</item>
+        <item>BEM-VINDO</item>
+        <item>ДОБРО ПОЖАЛОВАТЬ</item>
+        <item>أهلاً وسهلاً</item>
+        <item>स्वागत है</item>
+        <item>ยินดีต้อนรับ</item>
+        <item>CHÀO MỪNG</item>
+        <item>HOŞ GELDİNİZ</item>
+        <item>WELKOM</item>
+        <item>SUGENG RAWUH</item>
+        <item>MABUHAY</item>
+        <item>ΚΑΛΩΣ ΗΡΘΑΤΕ</item>
+    </string-array>
     <string name="welcome_preparing_subtitle">Let\'s get everything ready for you.</string>
     <string name="get_started">Get Started</string>
 
     <string name="perm_required">Required</string>
     <string name="perm_permissions">Permissions</string>
-    <string name="perm_intro_text">These permissions are required for nika to function correctly. Please grant them to proceed.</string>
+    <string name="perm_intro_text">These permissions are required for NikaMusic to function correctly. Please grant them to proceed.</string>
 
     <string name="perm_notif_title">Notifications</string>
     <string name="perm_notif_desc">Know immediately when your music is playing and control it from the notification bar.</string>
@@ -915,7 +942,7 @@
 
     <string name="feat_discover">Discover</string>
     <string name="feat_features">Features</string>
-    <string name="feat_intro">Explore everything nika has to offer for your music journey.</string>
+    <string name="feat_intro">Explore everything NikaMusic has to offer for your music journey.</string>
 
     <string name="feat_lyrics_title">Smart Lyrics</string>
     <string name="feat_lyrics_desc">Enjoy synchronized, word-by-word lyrics for millions of songs.</string>
@@ -939,7 +966,7 @@
     <string name="welcome_update_status">Updated</string>
     <string name="welcome_update_intro">Ensuring you have the latest features and security improvements.</string>
     <string name="welcome_checking_updates">Checking for updates…</string>
-    <string name="welcome_up_to_date">nika is up to date!</string>
+    <string name="welcome_up_to_date">NikaMusic is up to date!</string>
     <string name="welcome_update_available">New version is available: %s</string>
     <string name="welcome_everything_ready">Everything is now up to date</string>
     <string name="commits_title">Commits</string>
@@ -1014,6 +1041,12 @@
     <string name="experimental_unlock_landscape">Unlock landscape</string>
     <string name="experimental_unlock_landscape_desc">Let the app turn sideways into its wide layout</string>
     <string name="experimental_unlock_landscape_detail">Off, the whole app stays upright however you hold your phone. On, it turns with your phone and lays pages out side by side. Still being worked on, so some screens may look off</string>
+    <string name="player_rotate">Rotate</string>
+    <string name="player_turn_upright">Turn upright</string>
+    <string name="experimental_stream_backend">Stream backend</string>
+    <string name="experimental_stream_backend_innertubex">InnerTubeX, then classic</string>
+    <string name="experimental_stream_backend_classic">Classic only</string>
+    <string name="experimental_stream_backend_detail">How YouTube songs find their stream. InnerTubeX tries first, and anything it can\'t play goes to the classic finder, so songs keep playing either way. Classic only skips InnerTubeX. Tap to switch</string>
     <string name="video_mode_whole_video">Show the whole video</string>
     <string name="video_mode_whole_video_desc">Off, the video is zoomed in to fill the screen</string>
     <plurals name="video_mode_seek_seconds">
@@ -1109,6 +1142,10 @@
     <string name="song_share_style_too_many">Too many words for this one</string>
     <string name="song_share_as_video">Share as video</string>
     <string name="song_share_as_video_hint">The song plays and the lyrics flow</string>
+    <string name="song_share_romanisation_hint">How the words are read, under each line</string>
+    <string name="song_share_romanisation_none">These lyrics read fine as they are</string>
+    <string name="song_share_romanisation_main_hint">The card sings the romanisation, the original goes under it</string>
+    <string name="song_share_translation_hint">Each line in your language, under it</string>
     <string name="song_share_caption">%1$s · %2$s</string>
     <!-- a meta app id from developers.facebook.com; while it's empty instagram and facebook get the finished video instead of a story with a sticker -->
     <string name="meta_app_id" translatable="false"></string>
@@ -1138,8 +1175,7 @@
 
     <!-- skips that cross over, the studio version of music videos, recent searches -->
     <string name="settings_blend_skips">Blend skips</string>
-    <string name="settings_blend_skips_desc">Loads the songs either side ahead, so skips, swipes and songs you pick crossfade straight in</string>
-    <string name="settings_blend_skips_crossmix">Off while Crossmix is on: Crossmix does the mixing, so skips just skip. The songs either side still load ahead</string>
+    <string name="settings_blend_skips_desc">Loads the songs either side ahead, so skips, swipes and songs you pick mix straight in, over your fade length and through your effect</string>
     <string name="settings_blend_ahead">Songs loaded ahead</string>
     <plurals name="settings_blend_ahead_value">
         <item quantity="one">%d song</item>
@@ -1210,4 +1246,23 @@
     <string name="recent_search_playlist">Playlist · %1$s</string>
     <string name="recent_search_artist">Artist</string>
     <string name="recent_search_remove">Remove from recent searches</string>
+    <string name="floating_lyrics_open">Open NikaMusic</string>
+    <string name="floating_lyrics_close">Close</string>
+    <string name="floating_lyrics_never">Don\'t show again</string>
+    <string name="floating_lyrics_turned_off">Floating lyrics are off. You can turn them back on in Settings.</string>
+    <string name="floating_lyrics_permission">Let NikaMusic show over other apps so the lyrics can float</string>
+    <string name="swipe_action_library">Add or remove from library</string>
+    <string name="swipe_action_details">View details</string>
+    <string name="menu_ai_translation">AI translation</string>
+    <string name="menu_change_output">Change device output</string>
+    <string name="menu_add_to_liked">Add to liked</string>
+    <string name="menu_remove_from_liked">Remove from liked</string>
+    <string name="menu_edit_player">Edit player</string>
+    <string name="menu_keep_screen_on">Keep screen on</string>
+    <string name="menu_sort_by">Sort by</string>
+    <string name="menu_resync_title">Re-sync with %1$s</string>
+    <string name="menu_resync_desc">Add the songs that are new on %1$s</string>
+    <string name="menu_resync_paste">Paste its %1$s link</string>
+    <string name="menu_choose_version">Choose different version</string>
+    <string name="menu_choose_version_desc">Wrong recording? Pick the right one from a list</string>
 </resources>

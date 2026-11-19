@@ -20,13 +20,13 @@ plugins {
 
 extensions.configure<ApplicationExtension> {
     namespace = "com.sandip.nikamusic"
-    compileSdk = 36
+    compileSdk = 37
     ndkVersion = "27.0.12077973"
 
     defaultConfig {
         applicationId = "com.sandip.nikamusic"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0.0"
 
@@ -58,6 +58,12 @@ extensions.configure<ApplicationExtension> {
         val discordClientId = localProperties.getProperty("DISCORD_CLIENT_ID")
             ?: System.getenv("DISCORD_CLIENT_ID") ?: ""
         buildConfigField("String", "DISCORD_CLIENT_ID", "\"$discordClientId\"")
+
+        // The Listen Together server people connect to by default (wss://...). Optional: it can also be typed in the app,
+        // and an invite link carries it, so friends never need to type it.
+        val listenServer = localProperties.getProperty("LISTEN_TOGETHER_SERVER")
+            ?: System.getenv("LISTEN_TOGETHER_SERVER") ?: ""
+        buildConfigField("String", "LISTEN_TOGETHER_SERVER", "\"$listenServer\"")
         manifestPlaceholders["discordRedirectScheme"] =
             if (discordClientId.isNotBlank()) "discord-$discordClientId" else "nika-discord-unset"
 
@@ -458,6 +464,8 @@ dependencies {
     implementation(libs.ktor.client.okhttp)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.json)
+    // finds song streams first, with nika's own client walk as the backup (YTPlayerUtils)
+    implementation(libs.innertubex)
 
     // Protobuf for message serialization (lite version for Android)
     implementation(libs.protobuf.javalite)
@@ -473,4 +481,7 @@ dependencies {
     implementation(libs.androidx.webkit)
 
     testImplementation(libs.junit)
+    androidTestImplementation(libs.junit)
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
 }

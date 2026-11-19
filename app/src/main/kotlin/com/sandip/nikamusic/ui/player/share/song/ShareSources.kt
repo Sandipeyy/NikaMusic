@@ -12,14 +12,13 @@ import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.request.transformations
 import coil3.toBitmap
-import com.sandip.nikamusic.applecanvas.AppleMusicCanvasProvider
-import com.sandip.nikamusic.canvas.MonochromeApiCanvas
 import com.sandip.nikamusic.db.MusicDatabase
 import com.sandip.nikamusic.db.entities.LyricsEntity
 import com.sandip.nikamusic.lyrics.LyricsHelper
 import com.sandip.nikamusic.lyrics.LyricsUtils
 import com.sandip.nikamusic.playback.MusicService
 import com.sandip.nikamusic.ui.player.CanvasArtworkPlaybackCache
+import com.sandip.nikamusic.ui.player.findCanvas
 import com.sandip.nikamusic.ui.player.lookUpVideo
 import com.sandip.nikamusic.ui.player.normalizeCanvasArtistName
 import com.sandip.nikamusic.ui.player.normalizeCanvasSongTitle
@@ -97,7 +96,7 @@ internal suspend fun loadLyricsOffset(session: SongShareSession, database: Music
 }
 
 // the album's looping cover from the same places the player finds it
-internal suspend fun loadAnimatedCover(session: SongShareSession) {
+internal suspend fun loadAnimatedCover(context: android.content.Context, session: SongShareSession) {
     val song = session.song
     CanvasArtworkPlaybackCache.get(song.id)?.preferredAnimationUrl?.takeIf { it.isNotBlank() }?.let {
         session.animatedCover = Fetched.Found(it)
@@ -110,14 +109,7 @@ internal suspend fun loadAnimatedCover(session: SongShareSession) {
         return
     }
     val duration = song.duration.takeIf { it > 0 }
-    val found = withContext(Dispatchers.IO) {
-        runCatching {
-            MonochromeApiCanvas.getBySongArtist(title, artist, null, duration)
-                ?.takeIf { !it.preferredAnimationUrl.isNullOrBlank() }
-                ?: AppleMusicCanvasProvider.getBySongArtist(title, artist, null, "us", duration)
-                    ?.takeIf { !it.preferredAnimationUrl.isNullOrBlank() }
-        }.getOrNull()
-    }
+    val found = runCatching { findCanvas(context, title, artist, durationSec = duration) }.getOrNull()
     if (found != null) CanvasArtworkPlaybackCache.put(song.id, found)
     session.animatedCover = found?.preferredAnimationUrl?.let { Fetched.Found(it) } ?: Fetched.Missing
 }

@@ -36,6 +36,7 @@ import com.sandip.nikamusic.modules.skin.ActiveSkin
 import com.sandip.nikamusic.modules.skin.ModuleMenu
 import com.sandip.nikamusic.ui.component.RemoteFocus
 import com.sandip.nikamusic.ui.component.SheetIcon
+import com.sandip.nikamusic.ui.screens.search.searchRoute
 import com.sandip.nikamusic.ui.screens.settings.devspace.openDevUrl
 import com.sandip.nikamusic.ui.screens.settings.modules.modulePageRoute
 import java.net.URLEncoder
@@ -69,7 +70,7 @@ internal fun openModuleTarget(context: Context, target: ActionTarget, song: Medi
     when (target) {
         is ActionTarget.Link -> context.openDevUrl(fill(target.template, song, encode = true))
         is ActionTarget.Page -> openRoute(modulePageRoute(moduleId, target.id))
-        is ActionTarget.Search -> openRoute("search/" + URLEncoder.encode(fill(target.template, song, encode = false), "UTF-8"))
+        is ActionTarget.Search -> openRoute(searchRoute(fill(target.template, song, encode = false)))
     }
 }
 

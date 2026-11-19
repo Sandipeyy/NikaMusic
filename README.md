@@ -35,6 +35,7 @@ Stream from YouTube Music, sync lyrics, download for offline and customise almos
 - Last.fm scrobbling and Discord rich presence
 
 **Extras**
+- **Liquid glass** floating navigation bar: the content behind it is bent at the edges like thick glass, with light highlights and a lens that follows the selected tab (Android 13+; a lighter frosted look on Android 12 and with "Disable blur" on). Slide a finger across the bar to switch tabs
 - **Listen together:** host a room, share a code, and friends follow your playback in sync (needs the small server in `server/listen-together`)
 - A **Recognize** tab with its own page and history, plus a Quick Settings tile
 - Set any song (or a trimmed part of it) as your ringtone
@@ -72,9 +73,39 @@ The APK ends up in `app/build/outputs/apk/`.
 
 Never commit your keystore. It is already in `.gitignore`.
 
+## Logins (Last.fm and Discord)
+
+Both logins need keys that are built into the app, so they only work in builds that were given them. Without them the app simply says the login is not set up. Add the keys as **repository secrets** (Settings → Secrets and variables → Actions) before you build.
+
+**Last.fm** (scrobbling and loves)
+1. Go to [last.fm/api/account/create](https://www.last.fm/api/account/create) and create an API account.
+2. Add the secrets `LASTFM_API_KEY` (the API key) and `LASTFM_SECRET` (the shared secret).
+3. Users then sign in inside the app with their Last.fm username and password.
+
+**Discord** (rich presence)
+1. Open the [Discord Developer Portal](https://discord.com/developers/applications) and create an application (name it NikaMusic).
+2. Copy its **Application ID** into the secret `DISCORD_CLIENT_ID`.
+3. In *OAuth2 → Redirects*, add exactly `discord-YOUR_APPLICATION_ID:/authorize/callback`, and turn on *Public Client*, because the app signs in with PKCE and has no client secret.
+4. The app asks for the `sdk.social_layer_presence` scope, which belongs to Discord's Social SDK, so also enable the Social SDK / rich presence for the application in the portal. Discord changes this part of the portal now and then, so follow its current wording.
+
+Building locally instead? Put `LASTFM_API_KEY`, `LASTFM_SECRET` and `DISCORD_CLIENT_ID` in `local.properties`.
+
 ## Listen together
 
-One person creates a room and picks the music, everyone else joins with a 6-character code and hears it in sync. It needs a small relay server that only passes along "which song, playing or paused, at what position". You host it yourself, for free, from [`server/listen-together`](server/listen-together) (step-by-step in its README). Then open *Settings tab → Listen together* in the app and paste your `wss://…` address.
+Open **Profile → Listen together** (or **Now Playing → ⋯ → Listen together**), then:
+
+1. **Create a room** or **join** one with its code
+2. **Share** the invite link or the 6-character code
+3. **Listen together**: everyone hears what the host plays, in sync
+
+Inside a room: members with their names and profile pictures, live; the host's play, pause, skip and seek reach everyone; a shared queue that guests can add to from any song menu (**Add to room queue**); the host can remove members; and a dropped connection reconnects on its own for about 90 seconds. Nobody ever types a server address.
+
+**For whoever builds the app (one-time setup):** Listen together talks to a small relay server that you host once and build into the app. It never touches audio or accounts.
+1. Deploy [`server/listen-together`](server/listen-together): on [Render](https://render.com) use *New → Blueprint* and pick this repo, the included `render.yaml` does the rest.
+2. Add the repository secret `LISTEN_TOGETHER_SERVER` with the service address, using `wss://` (for example `wss://nikamusic-listen-together.onrender.com`).
+3. Build the app. In a build without it the page just says Listen together isn't available right now.
+
+If you hosted an older version of the server, redeploy it: this version speaks a newer protocol.
 
 ## Updates
 
@@ -99,7 +130,7 @@ Release builds need the four signing secrets above. Every release has to be sign
 | `app/` | the Android app (Jetpack Compose UI, Hilt, Room, Media3) |
 | `providers/` | YouTube Music client, lyrics sources, Shazam and Last.fm |
 | `modules/` | shared library modules |
-| `server/listen-together/` | the optional Node.js server for Listen together |
+| `server/listen-together/` | the Node.js backend for Listen together |
 | `.github/workflows/` | the build workflow |
 
 ## Credits

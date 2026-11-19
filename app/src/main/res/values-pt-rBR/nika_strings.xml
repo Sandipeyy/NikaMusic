@@ -371,7 +371,7 @@
     <string name="enable_scrobbling">Ativar scrobbling</string>
     <string name="lastfm_now_playing">Enviar reprodução atual</string>
     <string name="last_fm_send_likes">Enviar Likes/Deslikes</string>
-    <string name="last_fm_send_likes_description">Curtir/Descurtir músicas no Last.fm quanto são Curtidas/Descurtidas no nika</string>
+    <string name="last_fm_send_likes_description">Curtir/Descurtir músicas no Last.fm quanto são Curtidas/Descurtidas no NikaMusic</string>
     <string name="logging_in">Fazendo login…</string>
     <string name="scrobbling_configuration">Configuração de scrobbling</string>
     <string name="scrobble_min_track_duration">Fazer scrobble de músicas mais longas que</string>
@@ -409,7 +409,7 @@
     <string name="karaoke">Karaoke</string>
     <string name="apple_music_style">Apple Music</string>
     <string name="apple_music_style_letter">Apple Music V2 (Letter by Letter)</string>
-    <string name="nika_1">nika (Fluid)</string>
+    <string name="nika_1">NikaMusic (Fluid)</string>
     <string name="apple_music_lyrics_blur">Apple Music Lyrics Blur</string>
     <string name="apple_music_lyrics_blur_desc">Apply blur to inactive lyrics lines for a premium focus effect</string>
     <string name="lyrics_v2_fluid">Lyrics V2 (Fluid)</string>
@@ -439,19 +439,19 @@
     <string name="wrapped_total_artists_subtitle">Artistas únicos</string>
     <string name="wrapped_total_songs_title">Você ouviu</string>
     <string name="wrapped_total_songs_subtitle">canções únicas</string>
-    <string name="wrapped_intro_title">nika</string>
+    <string name="wrapped_intro_title">NikaMusic</string>
     <string name="wrapped_intro_subtitle">é hora de checar o que você tem ouvido</string>
     <string name="wrapped_intro_button">vamos lá!</string>
-    <string name="wrapped_end_thanks">Obrigado por ouvir com o nika!</string>
+    <string name="wrapped_end_thanks">Obrigado por ouvir com o NikaMusic!</string>
     <string name="wrapped_end_create_playlist">Crie Sua Lista de Reprodução Embrulhada</string>
     <string name="wrapped_end_creating_playlist">Criando...</string>
     <string name="wrapped_end_playlist_saved">Lista de Reprodução Salva</string>
-    <string name="wrapped_logo_content_description">nika Logo</string>
+    <string name="wrapped_logo_content_description">NikaMusic Logo</string>
     <string name="wrapped_year">2025</string>
     <string name="wrapped_ready_title">SEU EMBRULHO ESTÁ PRONTO!</string>
     <string name="wrapped_ready_subtitle">Hora de checar o que você amou esse ano.</string>
     <string name="wrapped_thank_you">Obrigado por ouvir</string>
-    <string name="wrapped_special_thanks">Agradecimentos especiais ao MO Agamy por criar o nika</string>
+    <string name="wrapped_special_thanks">Agradecimentos especiais ao MO Agamy por criar o NikaMusic</string>
     <string name="wrapped_close">Feche o embrulho</string>
     <string name="wrapped_playlist_title">Seu %s Embrulhado</string>
     <string name="wrapped_create_playlist">Criar lista de reprodução</string>
@@ -486,7 +486,7 @@
     <string name="eq_label_mid">Mids</string>
     <string name="eq_label_treble">Treble</string>
     <string name="eq_preset_flat">Flat</string>
-    <string name="eq_preset_nika_signature">nika Signature</string>
+    <string name="eq_preset_nika_signature">NikaMusic Signature</string>
     <string name="eq_preset_acoustic">Acoustic</string>
     <string name="eq_preset_spatial">3D Stage</string>
     <string name="eq_preset_bass_boost">Bass Boost</string>
@@ -505,7 +505,7 @@
     <string name="eq_preset_dirac_game">Dirac Game</string>
     <string name="eq_enable_title">nikaEqualizer</string>
     <string name="eq_enable_summary">Toggle professional audio processing</string>
-    <string name="eq_label_nika">nika Signature</string>
+    <string name="eq_label_nika">NikaMusic Signature</string>
     <string name="eq_label_dolby">Dolby Atmos</string>
     <string name="eq_label_dirac">Dirac Audio</string>
     <string name="eq_reset">Reset</string>
@@ -522,9 +522,9 @@
     <string name="plays">plays</string>
     <string name="casting_to">Transmitir para %s</string>
     <string name="progress_percent">Progresso %s%%</string>
-    <string name="listening_to_nika">Ouvindo nika</string>
+    <string name="listening_to_nika">Ouvindo NikaMusic</string>
     <string name="listen_on_youtube_music">Ouça no YouTube Music</string>
-    <string name="visit_nika">Visite nika</string>
+    <string name="visit_nika">Visite NikaMusic</string>
     <string name="open">Abrir</string>
     <string name="failed_to_create_image">Falha ao criar a imagem: %s</string>
     <string name="copied_title">Título Copiado</string>
@@ -539,13 +539,13 @@
     <!-- Widget strings -->
     <string name="album_art">Capa do Álbum</string>
     <string name="no_song_playing">Nenhuma música tocando</string>
-    <string name="tap_to_open">Clique para abrir o nika</string>
+    <string name="tap_to_open">Clique para abrir o NikaMusic</string>
     <string name="previous">Anterior</string>
     <string name="play_pause">Tocar/Pausar</string>
     <string name="next">Próximo</string>
     <string name="like">Gostei</string>
     <string name="not_playing">Nenhuma música tocando</string>
-    <string name="tap_to_play">Clique para abrir o nika</string>
+    <string name="tap_to_play">Clique para abrir o NikaMusic</string>
     <string name="widget_description">Widget do tocador com controles de reprodução</string>
     <string name="queue_widget_description">Tocador de música com prévia da fila</string>
     <string name="turntable_widget_description">Widget circular de música com controles de reprodução e curtida</string>
@@ -699,7 +699,7 @@
     <string name="crash_share_logs">Compartilhar registros</string>
     <string name="copy_logs">Copy Logs</string>
     <string name="crash_share_title">Compartilhar relatório de falha</string>
-    <string name="crash_report_subject">Relatório de Acidente da nika</string>
+    <string name="crash_report_subject">Relatório de Acidente da NikaMusic</string>
     <string name="crash_close">Fechar</string>
     <string name="crash_no_log">Nenhum registro de falha disponível</string>
     <!-- Theme Palette Names -->
@@ -748,7 +748,7 @@
     <string name="delete_from_history">Apagar do histórico</string>
     <string name="re_listen">Ouvir novamente</string>
     <string name="hold_to_recognize">Segure o ícone de pesquisa para reconhecer música</string>
-    <string name="play_on_app">Tocar no nika</string>
+    <string name="play_on_app">Tocar no NikaMusic</string>
     <string name="recognized_track">Trilha reconhecida</string>
     <!-- CSV Import Strings -->
     <string name="map_csv_columns">Mapear colunas CSV</string>
@@ -785,9 +785,9 @@
     <string name="discord_rpc_preview">Visualização de rich presence</string>
     <string name="discord_presence">Presença</string>
     <string name="discord_connect_description">Entre com o Discord para compartilhar o que você está ouvindo</string>
-    <string name="discord_playing_nika">Jogando nika</string>
-    <string name="discord_watching_nika">Assistindo nika</string>
-    <string name="discord_competing_nika">Competindo no nika</string>
+    <string name="discord_playing_nika">Jogando NikaMusic</string>
+    <string name="discord_watching_nika">Assistindo NikaMusic</string>
+    <string name="discord_competing_nika">Competindo no NikaMusic</string>
     <string name="discord_activity_name">Nome da atividade</string>
     <string name="discord_activity_name_description">Nome personalizado para a atividade (deixe vazio para padrão)</string>
     <string name="discord_advanced_mode">Modo avançado</string>
@@ -840,14 +840,14 @@
     <string name="get_started">Get Started</string>
     <string name="perm_required">Required</string>
     <string name="perm_permissions">Permissions</string>
-    <string name="perm_intro_text">These permissions are required for nika to function correctly. Please grant them to proceed.</string>
+    <string name="perm_intro_text">These permissions are required for NikaMusic to function correctly. Please grant them to proceed.</string>
     <string name="perm_notif_title">Notifications</string>
     <string name="perm_notif_desc">Know immediately when your music is playing and control it from the notification bar.</string>
     <string name="perm_install_title">App Installation</string>
     <string name="perm_install_desc">Required to download and install app updates seamlessly.</string>
     <string name="feat_discover">Discover</string>
     <string name="feat_features">Features</string>
-    <string name="feat_intro">Explore everything nika has to offer for your music journey.</string>
+    <string name="feat_intro">Explore everything NikaMusic has to offer for your music journey.</string>
     <string name="feat_lyrics_title">Smart Lyrics</string>
     <string name="feat_lyrics_desc">Enjoy synchronized, word-by-word lyrics for millions of songs.</string>
     <string name="feat_download_title">Offline Playback</string>
@@ -865,7 +865,7 @@
     <string name="welcome_update_status">Updated</string>
     <string name="welcome_update_intro">Ensuring you have the latest features and security improvements.</string>
     <string name="welcome_checking_updates">Checking for updates…</string>
-    <string name="welcome_up_to_date">nika is up to date!</string>
+    <string name="welcome_up_to_date">NikaMusic is up to date!</string>
     <string name="welcome_update_available">New version is available: %s</string>
     <string name="welcome_everything_ready">Everything is now up to date</string>
     <string name="commits_title">Commits</string>

@@ -81,11 +81,11 @@ object TvControl {
 
     private fun route(request: LinkRequest): LinkResponse {
         val phone = TvProfiles.active()?.phone ?: return LinkResponse.status(409, "no phone linked")
-        if (request.header(LinkWire.OldKeyHeader) != null) return LinkResponse.status(426, "update nika on the phone")
+        if (request.header(LinkWire.OldKeyHeader) != null) return LinkResponse.status(426, "update NikaMusic on the phone")
         // signed by the linked phone's key, which never travels; anything else is turned away
         verifier.verify(request) { id -> phone.key.takeIf { id == phone.id } } ?: return LinkResponse.status(401)
         if (!_allowed.value) return LinkResponse.status(403, "control is off on the tv")
-        val connection = LinkPlayer.connection ?: return LinkResponse.status(409, "nika isn't open on the tv")
+        val connection = LinkPlayer.connection ?: return LinkResponse.status(409, "NikaMusic isn't open on the tv")
         val handler = routes ?: return LinkResponse.status(409)
         noteController(phone.name)
         return handler.handle(request, connection)

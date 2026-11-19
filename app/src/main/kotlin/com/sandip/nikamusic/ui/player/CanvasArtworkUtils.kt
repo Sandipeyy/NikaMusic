@@ -2,7 +2,20 @@
 
 package com.sandip.nikamusic.ui.player
 
+import android.content.Context
+import com.sandip.nikamusic.applecanvas.AppleMusicCanvasProvider
 import com.sandip.nikamusic.canvas.CanvasArtwork
+import com.sandip.nikamusic.canvas.MonochromeApiCanvas
+import com.sandip.nikamusic.canvas.SpotifyCanvasProvider
+import com.sandip.nikamusic.constants.CanvasOrder
+import com.sandip.nikamusic.constants.CanvasOrderKey
+import com.sandip.nikamusic.constants.CanvasSource
+import com.sandip.nikamusic.constants.SpotifyCanvasKey
+import com.sandip.nikamusic.extensions.toEnum
+import com.sandip.nikamusic.utils.dataStore
+import com.sandip.nikamusic.utils.get
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 object CanvasArtworkPlaybackCache {
     private const val defaultMaxSize = 256
@@ -50,6 +63,28 @@ object CanvasArtworkPlaybackCache {
             } else {
                 break
             }
+        }
+    }
+}
+
+// asks the canvas sources in the order picked in app behaviour and keeps the first loop one of them has
+internal suspend fun findCanvas(
+    context: Context,
+    title: String,
+    artist: String,
+    album: String? = null,
+    storefront: String = "us",
+    durationSec: Int? = null,
+): CanvasArtwork? {
+    val order = context.dataStore[CanvasOrderKey].toEnum(CanvasOrder.APPLE_TIDAL_SPOTIFY)
+    val spotify = context.dataStore.get(SpotifyCanvasKey, false)
+    return withContext(Dispatchers.IO) {
+        order.sources.firstNotNullOfOrNull { source ->
+            when (source) {
+                CanvasSource.APPLE_MUSIC -> AppleMusicCanvasProvider.getBySongArtist(title, artist, album, storefront, durationSec)
+                CanvasSource.TIDAL -> MonochromeApiCanvas.getBySongArtist(title, artist, album, durationSec)
+                CanvasSource.SPOTIFY -> if (spotify) SpotifyCanvasProvider.getBySongArtist(context, title, artist, durationSec) else null
+            }?.takeIf { !it.preferredAnimationUrl.isNullOrBlank() }
         }
     }
 }

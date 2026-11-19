@@ -35,7 +35,7 @@
     <string name="mobile_network_warning">モバイルネットワーク経由、またはローミング中にアップデートをダウンロードすると、追加料金が発生する場合があります</string>
     <string name="update_size">更新容量: %1$s MB</string>
     <string name="check_internet_connection">ネット接続を確認してください</string>
-    <string name="nika_music_version">nika MUSIC バージョン %1$s</string>
+    <string name="nika_music_version">NikaMusic MUSIC バージョン %1$s</string>
     <string name="last_checked">Last checked: %1$s</string>
     <string name="install">インストール</string>
     <string name="check_for_update">更新チェック</string>
@@ -51,7 +51,7 @@
     <string name="update_notifications_subtitle">新しいアップデートがあるときに通知</string>
     <string name="settings_check_updates_title">アップデートを確認</string>
     <string name="later">Later</string>
-    <string name="nika_music_title">nika MUSIC</string>
+    <string name="nika_music_title">NikaMusic MUSIC</string>
     <string name="developer_section">開発者</string>
     <string name="collaborator_section">協力者</string>
     <string name="app_info_section">アプリ情報</string>

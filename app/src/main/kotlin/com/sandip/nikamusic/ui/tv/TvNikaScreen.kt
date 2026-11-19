@@ -49,7 +49,6 @@ import com.sandip.nikamusic.link.tv.TvControl
 import com.sandip.nikamusic.link.tv.TvProfile
 import com.sandip.nikamusic.link.tv.TvProfiles
 import com.sandip.nikamusic.ui.component.LocalZoomOutOverlayState
-import com.sandip.nikamusic.ui.screens.donate.showDonateSheet
 import com.sandip.nikamusic.ui.screens.update.rememberUpdateState
 import com.sandip.nikamusic.ui.screens.update.showUpdateSheet
 
@@ -87,9 +86,6 @@ internal fun TvNikaScreen(profile: TvProfile) {
         ) { TvControl.setAllowed(!phoneControl) },
         TvNikaTile("updates", stringResource(R.string.tv_nika_updates), stringResource(R.string.tv_nika_version, BuildConfig.VERSION_NAME), R.drawable.sync) {
             popup.showUpdateSheet(updateState)
-        },
-        TvNikaTile("support", stringResource(R.string.tv_nika_support), stringResource(R.string.tv_nika_support_detail), R.drawable.favorite) {
-            popup.showDonateSheet()
         },
     )
 

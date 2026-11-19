@@ -6,6 +6,8 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +27,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -473,6 +476,31 @@ private fun PlayerSheet(
     var styleCovered by remember { mutableStateOf(false) }
     var styleQueueCovered by remember { mutableStateOf(false) }
     val styleCoveredNow = remember { { styleCovered || styleQueueCovered } }
+    // the rotate button on the styles' menus, each style remembering its own; never on a tv, which doesn't turn
+    val styleCanTurn = playerStyle.turnable && !onTv
+    val (styleTurnedSaved, setStyleTurned) = rememberPreference(
+        com.sandip.nikamusic.constants.playerStyleRotatedKey(playerStyle),
+        defaultValue = playerStyle.startsSideways,
+    )
+    val styleTurned = styleCanTurn && styleTurnedSaved
+    val styleTurnedNow by androidx.compose.runtime.rememberUpdatedState(styleTurned)
+    val setStyleTurnedNow by androidx.compose.runtime.rememberUpdatedState(setStyleTurned)
+    val styleTurn = remember {
+        com.sandip.nikamusic.ui.player.styles.StyleTurn(isTurned = { styleTurnedNow }, toggle = { setStyleTurnedNow(!styleTurnedNow) })
+    }
+    // the window turns once the player is all the way open and stays turned until it's back down to the mini player, like the full video mode
+    var playerFullyOpen by remember { mutableStateOf(false) }
+    LaunchedEffect(state) {
+        snapshotFlow { state.isExpanded to (state.isCollapsed || state.isDismissed) }.collect { (open, closed) ->
+            if (open) playerFullyOpen = true else if (closed) playerFullyOpen = false
+        }
+    }
+    // user landscape keeps to the phone's rotation lock; the sensor one ignored it and flipped the player whenever the phone tilted
+    com.sandip.nikamusic.ui.utils.HoldOrientation(
+        orientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE,
+        active = styleTurned && playerFullyOpen,
+    )
+
     val styleActions = remember(openStudio) {
         com.sandip.nikamusic.ui.player.styles.StyleActions(
             onOtherMenu = {
@@ -498,6 +526,7 @@ private fun PlayerSheet(
             },
             onClose = { state.collapseSoft() },
             onQueue = { styleQueueOpen = true },
+            turn = if (onTv) null else styleTurn,
         )
     }
 
@@ -852,6 +881,7 @@ private fun PlayerSheet(
             com.sandip.nikamusic.ui.player.studio.PlayerMenuAction.SEE_VIDEO -> seeVideo
             com.sandip.nikamusic.ui.player.studio.PlayerMenuAction.REPEAT -> transportState.repeatMode != Player.REPEAT_MODE_OFF
             com.sandip.nikamusic.ui.player.studio.PlayerMenuAction.SHUFFLE -> transportState.shuffleModeEnabled
+            com.sandip.nikamusic.ui.player.studio.PlayerMenuAction.ROTATE -> styleTurned
             else -> menuExtras.isActive(action)
         }
         val onMenuAction: (com.sandip.nikamusic.ui.player.studio.PlayerMenuAction) -> Unit = { action ->
@@ -874,6 +904,7 @@ private fun PlayerSheet(
                 com.sandip.nikamusic.ui.player.studio.PlayerMenuAction.EQUALIZER -> openEqualizer()
                 com.sandip.nikamusic.ui.player.studio.PlayerMenuAction.OUTPUT -> showDeviceOutput = true
                 com.sandip.nikamusic.ui.player.studio.PlayerMenuAction.FULL_VIDEO -> enterVideoMode()
+                com.sandip.nikamusic.ui.player.studio.PlayerMenuAction.ROTATE -> styleTurn.toggle()
                 else -> menuExtras.run(action)
             }
         }
@@ -959,6 +990,10 @@ private fun PlayerSheet(
                             likeBurst.likeFromDoubleTap(position, trackInfo.liked, playerConnection::toggleLike)
                         }
                     },
+                    // tapping the art opens the song details like the title does, not on the turntable since its record has its own taps
+                    onTapCover = if (playerStyle.flagshipFamily && !isTurntable && !landscapeFlagship) {
+                        { if (!studioEngaged) showSongDetails = true }
+                    } else null,
                     onArtBoundsChanged = { rects.cover = it },
                     onVideoShowingChange = { videoShowing = it },
                     ambient = if (isFlagship || backgroundStyle == PlayerBackgroundStyle.AMBIENT) ambient else null,
@@ -1091,8 +1126,16 @@ private fun PlayerSheet(
                     onSongInfo = { if (!studioEngaged) showSongDetails = true },
                     onSwitchLyricsSource = { showLyricsSource = true },
                     transport = { transportModifier ->
-                        if (isFlagship) FlagshipTransportRow(layout = transportLayout, modifier = transportModifier)
-                        else PlayerTransportRow(modifier = transportModifier, flagshipGlyph = isTurntable)
+                        if (isFlagship) {
+                            FlagshipTransportRow(
+                                layout = transportLayout,
+                                queueOpen = showQueue,
+                                onQueue = { if (showQueue) transition.close() else transition.open(PlayerPage.QUEUE) },
+                                modifier = transportModifier,
+                            )
+                        } else {
+                            PlayerTransportRow(modifier = transportModifier, flagshipGlyph = isTurntable)
+                        }
                     },
                     bottom = { barModifier ->
                         when {
@@ -1261,7 +1304,7 @@ private fun PlayerSheet(
 
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-
+                        .widthIn(max = 600.dp)
                         .padding(horizontal = 26.dp)
                         .then(Modifier.studioAnchor(studioAnchors) { it.card })
                         .then(Modifier.studioBarLayer(studioParts) { it.card })
@@ -1278,6 +1321,7 @@ private fun PlayerSheet(
             if ((showVolumeBar || barLifted) && deckMounted) {
                 val volumeBarModifier = Modifier
                     .align(Alignment.BottomCenter)
+                    .widthIn(max = 600.dp)
                     .padding(
                         bottom = if (newBottomBar) flagshipBarFootprint() - FlagshipBarHeight
                         else playerVolumeBarFootprint() - PlayerVolumeBarHeight
@@ -1352,6 +1396,7 @@ private fun PlayerSheet(
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
+                    .widthIn(max = 600.dp)
                     .fillMaxWidth()
                     .padding(bottom = belowControls + transportGap.coerceAtLeast(0.dp))
                     // where the editor's hold put them; only placed, so a drag never recomposes
@@ -1643,7 +1688,12 @@ private fun PlayerSheet(
                     .studioTransportLayer(studioParts)
                     .studioPiece(studioPieces, StudioPieces.TRANSPORT)
                 if (isFlagship) {
-                    FlagshipTransportRow(layout = transportLayout, modifier = transportModifier)
+                    FlagshipTransportRow(
+                        layout = transportLayout,
+                        queueOpen = showQueue,
+                        onQueue = { if (showQueue) transition.close() else transition.open(PlayerPage.QUEUE) },
+                        modifier = transportModifier,
+                    )
                 } else {
                     PlayerTransportRow(modifier = transportModifier, flagshipGlyph = isTurntable)
                 }
@@ -1663,6 +1713,7 @@ private fun PlayerSheet(
                     onStreamInfoClick = { if (!studioEngaged) showStreamInfo = true },
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
+                        .widthIn(max = 600.dp)
                         .padding(bottom = belowControls + TurntableControlsLift)
                         .graphicsLayer {
                             alpha = (1f - controlsHidden) * (1f - turntablePageProgress)
@@ -1705,7 +1756,9 @@ private fun PlayerSheet(
                 }
                 // with a youtube video on the cover, the full video mode goes on top unless it's already one of the four
                 val fullVideo = com.sandip.nikamusic.ui.player.studio.PlayerMenuAction.FULL_VIDEO
-                if (videoShowing && fullVideo !in set) listOf(fullVideo) + set else set
+                val withVideo = if (videoShowing && fullVideo !in set) listOf(fullVideo) + set else set
+                // the turntable's rotate button sits last, the way the other styles keep theirs at the end
+                if (isTurntable && styleCanTurn) withVideo + com.sandip.nikamusic.ui.player.studio.PlayerMenuAction.ROTATE else withVideo
             },
             isActive = ::menuActionActive,
             onAction = onMenuAction,
@@ -1717,11 +1770,10 @@ private fun PlayerSheet(
             controlsDrawShift = controlsDrawShift,
         )
 
-        // Pulling down at the top of the queue list stretches the list instead of closing the
-        // player. (Lyrics keep the pull-to-close.)
+        // pulling past the top of the queue or lyrics only stretches the list, scrolling back to the song's start kept closing the player
         // the full video mode's pane is a side panel turned sideways: past its top it only stretches, the player stays open
-        androidx.compose.runtime.DisposableEffect(state, showQueue, playerStyle) {
-            state.collapseOnNestedOverscroll = !showQueue && playerStyle != PlayerStyle.VIDEO
+        androidx.compose.runtime.DisposableEffect(state, showQueue, showLyrics, playerStyle) {
+            state.collapseOnNestedOverscroll = !showQueue && !showLyrics && playerStyle != PlayerStyle.VIDEO
             onDispose { state.collapseOnNestedOverscroll = true }
         }
 
@@ -1963,7 +2015,8 @@ private fun ExpandMenuOverlay(
     controlsDrawShift: androidx.compose.ui.unit.Dp,
     modifier: Modifier = Modifier
 ) {
-    val menuItems = remember(slots) { slots.map { it.label to it.icon } }
+    val menuLabels = slots.map { stringResource(it.labelRes) }
+    val menuItems = slots.mapIndexed { i, action -> menuLabels[i] to action.icon }
 
     val density = LocalDensity.current
     // one per item, so a style that adds items gets its own set instead of reading past the end
@@ -2093,6 +2146,14 @@ private fun ExpandMenuOverlay(
                                 .align(Alignment.BottomEnd)
                                 .padding(end = chevronEndDp, bottom = menuBottomDp)
                         }
+                    )
+                    // only a list too tall for the room above the chevron scrolls, from its end; a scroll would clip the rows sliding in
+                    .then(
+                        if ((34.dp + MenuItemBlurRoom * 2 + 16.dp) * menuItems.size > screenHeight - menuBottomDp) {
+                            Modifier.verticalScroll(rememberScrollState(), reverseScrolling = true)
+                        } else {
+                            Modifier
+                        }
                     ),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = if (fromLeft) Alignment.Start else Alignment.End
@@ -2129,11 +2190,13 @@ private fun ExpandMenuOverlay(
                         ) {
                             val action = slots[index]
                             val isToggled = isActive(action)
-                            // a downloaded song's button deletes it, so the words say that instead of download
-                            val labelText = if (action == com.sandip.nikamusic.ui.player.studio.PlayerMenuAction.DOWNLOAD && isToggled) {
-                                stringResource(R.string.player_menu_delete_download)
-                            } else {
-                                item.first
+                            // a downloaded song's button deletes it, and a turned turntable's turns it back, so the words say that
+                            val labelText = when {
+                                action == com.sandip.nikamusic.ui.player.studio.PlayerMenuAction.DOWNLOAD && isToggled ->
+                                    stringResource(R.string.player_menu_delete_download)
+                                action == com.sandip.nikamusic.ui.player.studio.PlayerMenuAction.ROTATE && isToggled ->
+                                    stringResource(R.string.player_turn_upright)
+                                else -> item.first
                             }
                             val label: @Composable () -> Unit = {
                             androidx.compose.material3.Text(

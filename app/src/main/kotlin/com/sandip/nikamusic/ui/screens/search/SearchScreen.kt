@@ -90,7 +90,6 @@ import com.sandip.nikamusic.viewmodels.coverKey
 import com.sandip.nikamusic.viewmodels.OnlineSearchSuggestionViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.net.URLEncoder
 import com.sandip.nikamusic.ui.component.navigateToTab
 import com.sandip.nikamusic.ui.component.RemoteFocus
 
@@ -182,7 +181,7 @@ fun SearchScreen(
                         navController.navigate("artist/${parsed.id}")
 
                     null ->
-                        navController.navigate("search/${URLEncoder.encode(text, "UTF-8")}")
+                        navController.navigate(searchRoute(text))
                 }
                 if (!pauseSearchHistory) {
                     coroutineScope.launch(Dispatchers.IO) {

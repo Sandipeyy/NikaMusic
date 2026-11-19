@@ -57,7 +57,7 @@ import com.sandip.nikamusic.ui.component.detail.PlaylistTrackBones
 import com.sandip.nikamusic.ui.component.detail.PlaylistModeBar
 import com.sandip.nikamusic.ui.component.detail.PlaylistSelectTick
 import com.sandip.nikamusic.ui.component.detail.PlaylistTrackRow
-import com.sandip.nikamusic.ui.component.detail.featuredArtistsOf
+import com.sandip.nikamusic.ui.component.detail.rememberFeaturedArtists
 import com.sandip.nikamusic.ui.component.librarySwipeAction
 import com.sandip.nikamusic.ui.component.queueSwipeAction
 import com.sandip.nikamusic.ui.component.rememberRevealSeenState
@@ -117,9 +117,7 @@ fun TopPlaylistScreen(
     }
 
     val totalSeconds = remember(all) { all.sumOf { it.song.duration } }
-    val featuredArtists = remember(all) {
-        featuredArtistsOf(all.flatMap { it.artists }, id = { it.id }, name = { it.name })
-    }
+    val featuredArtists = rememberFeaturedArtists(all, { all.flatMap { it.artists } }, id = { it.id }, name = { it.name })
     val downloadState = rememberSongsDownloadState(remember(all) { all.map { it.song.id } })
     var showRemoveDownloadDialog by remember { mutableStateOf(false) }
     val isThisQueue = queueTitle == name
@@ -169,7 +167,7 @@ fun TopPlaylistScreen(
         searchPlaceholder = "Search your top songs",
         onBackClick = { navController.navigateUp() },
         onBackLongClick = { navController.backToMain() },
-        creator = "nika",
+        creator = "NikaMusic",
         onMoreClick = {
             menuState.show {
                 TopPlaylistMenu(

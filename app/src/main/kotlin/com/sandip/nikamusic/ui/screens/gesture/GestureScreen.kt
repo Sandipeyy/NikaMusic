@@ -119,7 +119,7 @@ fun GestureScreen(navController: NavController) = CustomisationScreen(navControl
 
 // the customize page's parts in order, with what a search or a settings result can find each one by
 private enum class CustomiseSection(@StringRes val titleRes: Int, val keys: List<String>, val words: String) {
-    ICONS(R.string.customise_icons, listOf("Icons", "App icon"), "icon icons app launcher home screen nika outline anime material you white black dark transparent"),
+    ICONS(R.string.customise_icons, listOf("Icons", "App icon"), "icon icons app launcher home screen NikaMusic outline anime material you white black dark transparent"),
     ROUNDING(R.string.customise_cover_rounding, listOf("Cover rounding"), "cover rounding corner radius square rounded art"),
     PLAYLIST(R.string.customise_playlist_styles, listOf("Playlist styles"), "playlist styles flow classic minimal header"),
     PLAYER(R.string.customise_player_styles, listOf("Player styles"), "player styles flagship turntable ipod poster timeline lyrics editor customize landscape sideways full cover square"),
@@ -443,7 +443,7 @@ private fun ActionDropdown(action: SongSwipeAction, onClick: () -> Unit) {
         ActionOptionBadge(action = action)
         Crossfade(targetState = action, animationSpec = tween(180), modifier = Modifier.weight(1f), label = "swipeAction") { shown ->
             Text(
-                shown.title,
+                stringResource(shown.title),
                 fontFamily = InterFontFamily,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 15.sp,
@@ -469,7 +469,7 @@ private fun ActionPicker(selected: SongSwipeAction, onPick: (SongSwipeAction) ->
     Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(bottom = 12.dp)) {
         SongSwipeAction.entries.forEach { option ->
             SheetOptionRow(
-                title = option.title,
+                title = stringResource(option.title),
                 onClick = { onPick(option) },
                 leading = { ActionOptionBadge(action = option) },
                 trailing = {

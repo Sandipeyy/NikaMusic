@@ -50,7 +50,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -89,7 +88,6 @@ import androidx.media3.exoplayer.offline.DownloadService
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.sandip.nikamusic.LocalDatabase
-import com.sandip.nikamusic.LocalDownloadUtil
 import com.sandip.nikamusic.LocalPlayerAwareWindowInsets
 import com.sandip.nikamusic.LocalPlayerConnection
 import com.sandip.nikamusic.R
@@ -121,7 +119,7 @@ import com.sandip.nikamusic.ui.component.librarySwipeAction
 import com.sandip.nikamusic.ui.component.queueSwipeAction
 import com.sandip.nikamusic.ui.component.removeFromPlaylistSwipeAction
 import com.sandip.nikamusic.ui.component.detail.CreatorUi
-import com.sandip.nikamusic.ui.component.detail.featuredArtistsOf
+import com.sandip.nikamusic.ui.component.detail.rememberFeaturedArtists
 import com.sandip.nikamusic.ui.component.detail.FeaturedArtistsRow
 import com.sandip.nikamusic.ui.component.detail.PlaylistDetailScaffold
 import com.sandip.nikamusic.ui.component.detail.PlaylistEndOfLine
@@ -216,8 +214,7 @@ fun LocalPlaylistScreen(
         selection.clear()
     }
 
-    val downloadUtil = LocalDownloadUtil.current
-    var downloadState by remember { mutableIntStateOf(Download.STATE_STOPPED) }
+    val downloadState = rememberSongsDownloadState(remember(songs) { songs.map { it.song.id } })
 
     val editable: Boolean = playlist?.playlist?.isEditable == true
     // unlocking from the menu turns the rows into drag handles; the bar's tick locks them again
@@ -246,22 +243,6 @@ fun LocalPlaylistScreen(
         mutableSongs.apply {
             clear()
             addAll(songs)
-        }
-        if (songs.isEmpty()) return@LaunchedEffect
-        downloadUtil.downloads.collect { downloads ->
-            downloadState =
-                if (songs.all { downloads[it.song.id]?.state == Download.STATE_COMPLETED }) {
-                    Download.STATE_COMPLETED
-                } else if (songs.all {
-                        downloads[it.song.id]?.state == Download.STATE_QUEUED ||
-                                downloads[it.song.id]?.state == Download.STATE_DOWNLOADING ||
-                                downloads[it.song.id]?.state == Download.STATE_COMPLETED
-                    }
-                ) {
-                    Download.STATE_DOWNLOADING
-                } else {
-                    Download.STATE_STOPPED
-                }
         }
     }
 
@@ -389,9 +370,7 @@ fun LocalPlaylistScreen(
         playlist?.thumbnails?.firstOrNull()
             ?: songs.firstOrNull { !it.song.song.thumbnailUrl.isNullOrEmpty() }?.song?.song?.thumbnailUrl
     }
-    val featuredArtists = remember(songs) {
-        featuredArtistsOf(songs.flatMap { it.song.artists }, id = { it.id }, name = { it.name })
-    }
+    val featuredArtists = rememberFeaturedArtists(songs, { songs.flatMap { it.song.artists } }, id = { it.id }, name = { it.name })
     val creatorAvatar = profilePicUri.takeIf { it.isNotBlank() }?.let { if (it.contains("://")) it else "file://$it" }
 
     fun play(items: List<com.sandip.nikamusic.db.entities.PlaylistSong>, startIndex: Int = 0) {
@@ -645,7 +624,11 @@ fun LocalPlaylistScreen(
                     deleteFromPlaylist()
                     val browseId = playlist?.playlist?.browseId
                     com.sandip.nikamusic.ui.component.TopToaster.show(
-                        text = "Removed ${removed.song.song.title} from ${playlist?.playlist?.name ?: "playlist"}",
+                        text = context.getString(
+                            R.string.playlist_removed_song_from,
+                            removed.song.song.title,
+                            playlist?.playlist?.name ?: context.getString(R.string.playlist_fallback_name),
+                        ),
                         thumbnail = removed.song.song.thumbnailUrl,
                         iconRes = R.drawable.playlist_add,
                         actionLabel = context.getString(R.string.undo),
@@ -721,7 +704,7 @@ fun LocalPlaylistScreen(
                                     ) {
                                         Icon(
                                             painter = painterResource(R.drawable.drag_handle),
-                                            contentDescription = "Drag to move",
+                                            contentDescription = stringResource(R.string.playlist_drag_to_move),
                                             tint = Color.White.copy(alpha = 0.78f),
                                         )
                                     }
@@ -819,7 +802,7 @@ fun LocalPlaylistScreen(
                             .fillMaxWidth()
                             .padding(top = 28.dp)
                     ) {
-                        PlaylistSectionTitle(title = "Related Playlists")
+                        PlaylistSectionTitle(title = stringResource(R.string.playlist_related))
                         Spacer(Modifier.height(9.dp))
                         LazyRow(
                             contentPadding = PaddingValues(horizontal = 36.dp),
@@ -894,7 +877,7 @@ fun LocalPlaylistScreen(
     if (showSortDialog) {
         AlertDialog(
             onDismissRequest = { showSortDialog = false },
-            title = { Text("Sort order") },
+            title = { Text(stringResource(R.string.playlist_sort_order)) },
             text = {
                 Column {
                     PlaylistSongSortType.entries.forEach { type ->
@@ -918,7 +901,9 @@ fun LocalPlaylistScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = stringResource(playlistSortLabel(type)) +
-                                    if (sortType == type) (if (sortDescending) " (Desc)" else " (Asc)") else "",
+                                    if (sortType == type) (if (sortDescending) stringResource(
+                                                        R.string.playlist_sort_desc,
+                                                    ) else stringResource(R.string.playlist_sort_asc)) else "",
                                 style = MaterialTheme.typography.bodyLarge
                             )
                         }

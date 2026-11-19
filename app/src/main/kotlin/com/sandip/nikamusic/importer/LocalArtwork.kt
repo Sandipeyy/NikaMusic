@@ -6,7 +6,6 @@ import android.content.Context
 import android.net.Uri
 import androidx.core.net.toUri
 import com.sandip.nikamusic.db.MusicDatabase
-import com.sandip.nikamusic.ui.screens.extractAudioMetadata
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
